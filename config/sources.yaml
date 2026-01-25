@@ -1,0 +1,225 @@
+# Patient Safety Monitor - Data Source Registry
+# Version: 1.0.0
+#
+# This file defines all data sources for scraping coronial and patient safety
+# investigation findings. Each source has a priority rating and implementation
+# status tracked in the framework document.
+#
+# Priority Ratings:
+#   P1 - High priority, well-structured data, high value
+#   P2 - Medium priority, useful but may require more processing
+#   P3 - Low priority, limited data or complex extraction
+#
+# Implementation Status:
+#   Phase 2 - Currently being implemented
+#   Phase 6 - Planned for future implementation
+#   Disabled - Not currently active
+
+sources:
+  # ===========================================================================
+  # United Kingdom Sources
+  # ===========================================================================
+  
+  - code: uk_pfd
+    name: "UK Prevention of Future Deaths"
+    country: GB
+    region: null
+    base_url: "https://www.judiciary.uk/prevention-of-future-death-reports/"
+    scraper_class: UKPFDScraper
+    schedule: "0 6 * * *"  # Daily at 6 AM UTC
+    is_active: true
+    priority: P1
+    implementation_phase: 2
+    config:
+      # Healthcare-related categories to filter
+      categories:
+        - "Hospital Death (Clinical)"
+        - "Hospital Death (Other)"
+        - "Medical cause"
+        - "Community health care and target settings"
+        - "Mental health related deaths"
+        - "Emergency services related deaths"
+      max_pages: 10
+      request_delay: 2.0
+      # Custom CSS selectors (overrides defaults if specified)
+      selectors: {}
+    notes: |
+      Primary source for UK coronial findings with healthcare relevance.
+      Reports published when coroner has concerns about preventing future deaths.
+      Well-structured HTML with consistent layout.
+  
+  - code: uk_hssib
+    name: "HSSIB Investigations"
+    country: GB
+    region: null
+    base_url: "https://www.hssib.org.uk/patient-safety-investigations/"
+    scraper_class: HSSIBScraper
+    schedule: "0 7 * * 1"  # Weekly on Monday at 7 AM UTC
+    is_active: false
+    priority: P1
+    implementation_phase: 6
+    config:
+      max_pages: 5
+      request_delay: 2.0
+      include_pdf_content: true
+    notes: |
+      Healthcare Safety Investigation Branch national investigations.
+      High-quality structured reports with recommendations.
+      PDF extraction required for full content.
+
+  # ===========================================================================
+  # Australian Sources
+  # ===========================================================================
+  
+  - code: au_vic
+    name: "Coroners Court Victoria"
+    country: AU
+    region: VIC
+    base_url: "https://www.coronerscourt.vic.gov.au/inquests-findings"
+    scraper_class: VICCoronerScraper
+    schedule: "0 20 * * *"  # Daily at 8 PM UTC (6 AM AEST)
+    is_active: false
+    priority: P1
+    implementation_phase: 6
+    config:
+      max_pages: 10
+      request_delay: 2.0
+      search_filters:
+        category: "healthcare"
+    notes: |
+      Victoria Coroners Court findings database.
+      Searchable with category filters available.
+      May require handling of dynamic content loading.
+  
+  - code: au_nsw
+    name: "NSW Coroners Court"
+    country: AU
+    region: NSW
+    base_url: "https://coroners.nsw.gov.au/coroners-court/coronial-findings-search.html"
+    scraper_class: NSWCoronerScraper
+    schedule: "0 20 * * *"  # Daily at 8 PM UTC (6 AM AEST)
+    is_active: false
+    priority: P1
+    implementation_phase: 6
+    config:
+      max_pages: 10
+      request_delay: 2.0
+    notes: |
+      NSW Coroners Court findings search.
+      PDF documents with structured format.
+  
+  - code: au_qld
+    name: "Queensland Coroners Court"
+    country: AU
+    region: QLD
+    base_url: "https://www.courts.qld.gov.au/courts/coroners-court/findings"
+    scraper_class: QLDCoronerScraper
+    schedule: "0 20 * * 1"  # Weekly on Monday at 8 PM UTC
+    is_active: false
+    priority: P2
+    implementation_phase: 6
+    config:
+      max_pages: 5
+      request_delay: 2.0
+    notes: |
+      Queensland Coroners Court findings.
+      Less frequent updates than VIC/NSW.
+  
+  - code: au_wa
+    name: "WA Coroners Court"
+    country: AU
+    region: WA
+    base_url: "https://www.coronerscourt.wa.gov.au/I/inquest_findings.aspx"
+    scraper_class: WACoronerScraper
+    schedule: "0 20 * * 1"  # Weekly on Monday
+    is_active: false
+    priority: P2
+    implementation_phase: 6
+    config:
+      max_pages: 5
+      request_delay: 2.0
+    notes: |
+      Western Australia Coroners Court findings.
+      May have limited healthcare-specific filtering.
+  
+  - code: au_sa
+    name: "SA Coroners Court"
+    country: AU
+    region: SA
+    base_url: "https://www.courts.sa.gov.au/court-information/coroners-court/findings/"
+    scraper_class: SACoronerScraper
+    schedule: "0 20 * * 1"  # Weekly on Monday
+    is_active: false
+    priority: P2
+    implementation_phase: 6
+    config:
+      max_pages: 5
+      request_delay: 2.0
+    notes: |
+      South Australia Coroners Court findings.
+
+  # ===========================================================================
+  # New Zealand Sources
+  # ===========================================================================
+  
+  - code: nz_hdc
+    name: "Health & Disability Commissioner"
+    country: NZ
+    region: null
+    base_url: "https://www.hdc.org.nz/decisions/"
+    scraper_class: NZHDCScraper
+    schedule: "0 19 * * *"  # Daily at 7 PM UTC (8 AM NZST)
+    is_active: false
+    priority: P1
+    implementation_phase: 6
+    config:
+      max_pages: 10
+      request_delay: 2.0
+      categories:
+        - "Public hospital"
+        - "Private hospital"
+        - "Rest home"
+        - "Mental health"
+    notes: |
+      NZ Health and Disability Commissioner decisions.
+      Well-structured HTML with good categorisation.
+      High-quality decisions with detailed analysis.
+  
+  - code: nz_coroner
+    name: "NZ Coronial Services"
+    country: NZ
+    region: null
+    base_url: "https://coronialservices.justice.govt.nz/findings/"
+    scraper_class: NZCoronerScraper
+    schedule: "0 19 * * 1"  # Weekly on Monday at 7 PM UTC
+    is_active: false
+    priority: P2
+    implementation_phase: 6
+    config:
+      max_pages: 5
+      request_delay: 2.0
+    notes: |
+      New Zealand Coronial Services findings database.
+      Requires filtering for healthcare-related cases.
+
+# ===========================================================================
+# Global Configuration
+# ===========================================================================
+
+defaults:
+  request_delay: 2.0
+  max_pages: 10
+  user_agent: "PatientSafetyMonitor/1.0 (+https://patientsafetymonitor.com/about)"
+  request_timeout: 30
+  retry_attempts: 3
+  retry_backoff: 2.0
+
+# Rate limits per domain (requests per minute)
+rate_limits:
+  judiciary.uk: 30
+  hssib.org.uk: 20
+  coronerscourt.vic.gov.au: 20
+  coroners.nsw.gov.au: 20
+  courts.qld.gov.au: 20
+  hdc.org.nz: 20
+  coronialservices.justice.govt.nz: 20

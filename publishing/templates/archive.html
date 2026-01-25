@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Archive | {{ site.title }}{% endblock %}
+{% block description %}Browse all {{ total_posts }} patient safety case studies from coronial investigations across the UK, Australia, and New Zealand.{% endblock %}
+{% block canonical %}{{ site.base_url }}/posts/{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <header class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Post Archive</h1>
+        <p class="text-gray-600">
+            {{ total_posts }} case {{ 'study' if total_posts == 1 else 'studies' }} from coronial investigations and patient safety reviews.
+        </p>
+    </header>
+    
+    <!-- Filter/Search -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-8">
+        <div class="flex flex-wrap gap-4 items-center">
+            <div class="flex-1 min-w-[200px]">
+                <label for="archive-search" class="sr-only">Search posts</label>
+                <div class="relative">
+                    <input type="search" 
+                           id="archive-search"
+                           placeholder="Search posts..." 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="text-sm text-gray-500">
+                Showing all {{ total_posts }} posts
+            </div>
+        </div>
+    </div>
+    
+    <!-- Posts grouped by month -->
+    {% if grouped_posts %}
+    <div class="space-y-12" id="posts-list">
+        {% for month_key, posts in grouped_posts.items() %}
+        {% set month_date = posts[0].published_at or posts[0].created_at %}
+        <section>
+            <h2 class="text-lg font-semibold text-gray-900 mb-4 sticky top-16 bg-gray-50 py-2 -mx-4 px-4">
+                {{ month_date.strftime('%B %Y') }}
+                <span class="text-sm font-normal text-gray-500 ml-2">
+                    ({{ posts | length }} {{ 'post' if posts | length == 1 else 'posts' }})
+                </span>
+            </h2>
+            
+            <div class="space-y-4">
+                {% for post in posts %}
+                <article class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow post-item"
+                         data-title="{{ post.title | lower }}"
+                         data-tags="{{ (post.tags or []) | join(' ') | lower }}">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center text-sm text-gray-500 mb-1">
+                                <time datetime="{{ post.published_at.isoformat() if post.published_at else '' }}">
+                                    {{ (post.published_at or post.created_at).strftime('%d %b') }}
+                                </time>
+                                {% if post.analysis and post.analysis.finding and post.analysis.finding.source %}
+                                <span class="mx-2">•</span>
+                                <span class="truncate">{{ post.analysis.finding.source.name }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <h3 class="font-medium text-gray-900">
+                                <a href="/posts/{{ post.slug }}/" class="hover:text-blue-600 transition-colors">
+                                    {{ post.title }}
+                                </a>
+                            </h3>
+                            
+                            {% if post.tags %}
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                {% for tag in post.tags[:3] %}
+                                <a href="/tags/{{ tag | lower | replace(' ', '-') }}/" 
+                                   class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">
+                                    {{ tag }}
+                                </a>
+                                {% endfor %}
+                                {% if post.tags | length > 3 %}
+                                <span class="text-xs text-gray-400">+{{ post.tags | length - 3 }}</span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <a href="/posts/{{ post.slug }}/" 
+                           class="text-blue-600 hover:text-blue-800 flex-shrink-0"
+                           aria-label="Read {{ post.title }}">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
+        <svg class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <p class="text-gray-600">No posts published yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Simple client-side filtering for archive
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('archive-search');
+    const posts = document.querySelectorAll('.post-item');
+    
+    if (searchInput && posts.length > 0) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            
+            posts.forEach(post => {
+                const title = post.dataset.title || '';
+                const tags = post.dataset.tags || '';
+                const matches = !query || title.includes(query) || tags.includes(query);
+                post.style.display = matches ? '' : 'none';
+            });
+            
+            // Show/hide section headers based on visible posts
+            document.querySelectorAll('#posts-list > section').forEach(section => {
+                const visiblePosts = section.querySelectorAll('.post-item:not([style*="display: none"])');
+                section.style.display = visiblePosts.length > 0 ? '' : 'none';
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

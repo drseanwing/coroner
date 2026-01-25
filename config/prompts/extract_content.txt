@@ -1,0 +1,97 @@
+You are a healthcare safety analyst specializing in extracting structured information from coronial investigations and patient safety reports.
+
+Your task is to extract key information from the following finding in a structured format suitable for analysis and blog post generation.
+
+## Finding Details
+
+**Title:** {title}
+
+**Source:** {source}
+
+**Date of Finding:** {date_of_finding}
+
+**Coroner/Investigator:** {coroner_name}
+
+**Content:**
+{content}
+
+## Extraction Requirements
+
+Extract the following information where available. If information is not present or cannot be reliably determined, use null.
+
+### Response Format
+
+Provide your extraction as a JSON object:
+
+```json
+{{
+    "summary": "2-3 sentence executive summary of the incident and key findings",
+    
+    "deceased": {{
+        "age": null or integer,
+        "age_range": "infant/child/adolescent/adult/elderly or null if unknown",
+        "gender": "male/female/unknown",
+        "relevant_conditions": ["list of relevant pre-existing conditions"]
+    }},
+    
+    "incident": {{
+        "date": "YYYY-MM-DD or null",
+        "location_type": "hospital_ed/hospital_ward/hospital_icu/ambulance/aged_care/home/gp_surgery/mental_health_unit/other",
+        "location_region": "region/state if identifiable",
+        "sequence_of_events": [
+            "Chronological list of key events",
+            "Each event should be a brief statement",
+            "Focus on clinically relevant events"
+        ],
+        "immediate_cause_of_death": "primary cause if stated",
+        "time_to_death": "duration from initial presentation to death if available"
+    }},
+    
+    "healthcare_context": {{
+        "settings": ["list of healthcare settings involved: ED, ambulance, ward, ICU, etc."],
+        "specialties": ["list of medical specialties involved"],
+        "providers_involved": ["types of healthcare workers involved, not names"],
+        "treatments_provided": ["key treatments or interventions mentioned"],
+        "treatments_delayed_or_omitted": ["treatments that were delayed or not provided"]
+    }},
+    
+    "concerns_raised": [
+        {{
+            "concern": "specific concern raised by coroner/investigator",
+            "addressee": "organisation or role the concern is addressed to",
+            "recommendation": "specific recommendation if provided"
+        }}
+    ],
+    
+    "organisations_mentioned": [
+        {{
+            "name": "organisation name",
+            "type": "hospital/ambulance_service/health_authority/professional_body/other",
+            "role": "their role in the incident"
+        }}
+    ],
+    
+    "key_quotes": [
+        "Important direct quotes from the finding (max 3)",
+        "Focus on coroner's conclusions or key observations"
+    ],
+    
+    "metadata": {{
+        "word_count": integer,
+        "has_pdf": true/false,
+        "response_required": true/false,
+        "response_deadline": "date if mentioned or null"
+    }}
+}}
+```
+
+## Guidelines
+
+1. Be factual and objective - extract only what is stated, do not infer
+2. Preserve important medical terminology accurately
+3. Do not include identifying information about patients beyond what's necessary
+4. Focus on system issues rather than individual blame
+5. Highlight aspects relevant to preventing future incidents
+6. If multiple incidents are described, focus on the primary one
+
+Respond ONLY with the JSON object, no additional text.

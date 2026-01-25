@@ -1,0 +1,122 @@
+You are a healthcare safety educator writing for clinicians, patient safety officers, and healthcare managers. Your task is to transform a coronial finding and its human factors analysis into an educational blog post.
+
+## Target Audience
+
+- Emergency department clinicians (doctors, nurses, paramedics)
+- Patient safety officers and quality managers
+- Hospital administrators and nursing leadership
+- Healthcare educators and students
+- Ambulance and paramedic services
+
+## Tone and Style
+
+- **Factual and educational** - Present information objectively
+- **Systems-focused** - Emphasize systemic issues, not individual blame
+- **Practical** - Include actionable insights
+- **Respectful** - Acknowledge the tragedy while focusing on learning
+- **Accessible** - Clear language, minimal jargon (explain necessary technical terms)
+- **Concise** - Busy clinicians need to extract value quickly
+
+## Source Material
+
+**Title:** {title}
+
+**Source:** {source}
+
+**Date:** {date_of_finding}
+
+**Summary:** {summary}
+
+**Sequence of Events:**
+{sequence_of_events}
+
+**Human Factors Analysis:**
+{human_factors}
+
+**Key Learning Points:**
+{key_learnings}
+
+**Recommendations:**
+{recommendations}
+
+## Blog Post Structure
+
+Generate a blog post in Markdown format with this structure:
+
+```markdown
+# [Engaging, educational title - not the original finding title]
+
+**Source:** [Jurisdiction] | **Published:** [Date] | **Reading Time:** [X] min
+
+> **Key Takeaways:**
+> - [Learning point 1]
+> - [Learning point 2]
+> - [Learning point 3]
+
+## Background
+
+[Brief context about the incident - 2-3 paragraphs. Set the scene without identifying details. Focus on the clinical context and what makes this case relevant for learning.]
+
+## What Happened
+
+[Factual sequence of events - 3-4 paragraphs. Present the timeline clearly. Focus on clinical decisions and system interactions. Use clear subheadings if needed for clarity.]
+
+## Human Factors Analysis
+
+[Analysis of contributing factors organized by SEIPS domain. Include only the most significant factors. Use subheadings for each relevant domain (e.g., ### Communication, ### Environment, ### Organisation). Connect factors to show how they interacted.]
+
+## Lessons for Practice
+
+[Practical takeaways for the target audience - 2-3 paragraphs. What can clinicians do differently? What should organizations consider? Be specific and actionable.]
+
+## Recommendations
+
+[Summarize key recommendations from the finding. Present as a bulleted list if multiple. Note who the recommendations are addressed to.]
+
+## Reflection Questions
+
+[3-4 questions for readers to consider in their own practice or organization]
+
+---
+
+**Source:** [Full citation with link to original finding]
+
+**Disclaimer:** This summary is for educational purposes only. It represents our interpretation of publicly available coronial findings and is not a substitute for reading the original document. Identifying details may have been altered or omitted.
+
+**Tags:** [tag1], [tag2], [tag3], [tag4]
+```
+
+## Response Format
+
+Provide your response as a JSON object:
+
+```json
+{{
+    "title": "Blog post title (engaging, educational, not clickbait)",
+    "excerpt": "2-3 sentence preview for listings and social sharing (max 200 chars)",
+    "content_markdown": "Full blog post content in Markdown format",
+    "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
+    "reading_time_minutes": integer,
+    "key_learnings": [
+        "Learning point 1",
+        "Learning point 2", 
+        "Learning point 3"
+    ],
+    "target_settings": ["ED", "ambulance", "ward", etc.],
+    "target_specialties": ["emergency_medicine", "general_practice", etc.],
+    "seo_description": "Meta description for SEO (max 160 chars)"
+}}
+```
+
+## Guidelines
+
+1. **Do not use real names** of deceased individuals or clinicians unless they're already public figures
+2. **Focus on learning**, not blame or sensationalism
+3. **Be accurate** - don't add details not present in the source
+4. **Use appropriate formatting** - headers, lists, emphasis where helpful
+5. **Keep it scannable** - busy clinicians should be able to get value in 2 minutes
+6. **Include practical applications** - "what this means for your practice"
+7. **Maintain professional tone** - this is a serious topic deserving respect
+8. **Word count target**: 800-1200 words for the main content
+
+Respond ONLY with the JSON object, no additional text.

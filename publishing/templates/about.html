@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}About | {{ site.title }}{% endblock %}
+{% block description %}Learn about Patient Safety Monitor, our mission, methodology, and the data sources we use to help healthcare practitioners learn from safety incidents.{% endblock %}
+{% block canonical %}{{ site.base_url }}/about/{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <header class="mb-12">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">About Patient Safety Monitor</h1>
+        <p class="text-xl text-gray-600">
+            Helping healthcare professionals learn from patient safety incidents across the UK, Australia, and New Zealand.
+        </p>
+    </header>
+    
+    <div class="prose prose-lg max-w-none">
+        <section class="mb-12">
+            <h2>Our Mission</h2>
+            <p>
+                Patient Safety Monitor exists to transform complex coronial findings and patient safety 
+                investigations into accessible, educational resources for healthcare practitioners. By 
+                systematically collecting and analysing these findings, we help identify patterns, human 
+                factors issues, and improvement opportunities that can prevent future patient harm.
+            </p>
+            <p>
+                Every healthcare professional can benefit from learning what has gone wrong elsewhere. 
+                Our goal is to make these learnings easily discoverable and actionable, without requiring 
+                practitioners to search through multiple government databases across different jurisdictions.
+            </p>
+        </section>
+        
+        <section class="mb-12">
+            <h2>How It Works</h2>
+            
+            <h3>1. Data Collection</h3>
+            <p>
+                We monitor official government sources for new coronial findings and patient safety 
+                investigation reports related to healthcare. Our automated systems check these sources 
+                regularly to ensure timely coverage of new findings.
+            </p>
+            
+            <h3>2. AI-Powered Analysis</h3>
+            <p>
+                Each finding undergoes analysis using the <strong>SEIPS 2.0</strong> (Systems Engineering 
+                Initiative for Patient Safety) framework. This structured approach identifies contributing 
+                factors across multiple domains:
+            </p>
+            <ul>
+                <li><strong>Individual factors:</strong> Fatigue, cognitive load, skill level, stress</li>
+                <li><strong>Team factors:</strong> Communication, handover, supervision, role clarity</li>
+                <li><strong>Task factors:</strong> Complexity, time pressure, interruptions</li>
+                <li><strong>Technology factors:</strong> Equipment, usability, maintenance</li>
+                <li><strong>Environment factors:</strong> Physical space, resources, crowding</li>
+                <li><strong>Organisational factors:</strong> Staffing, policies, culture, training</li>
+            </ul>
+            
+            <h3>3. Human Review</h3>
+            <p>
+                All AI-generated content undergoes human review before publication. Our reviewers ensure 
+                accuracy, appropriateness, and educational value while maintaining respect for those 
+                involved in the original incidents.
+            </p>
+            
+            <h3>4. Publication</h3>
+            <p>
+                Approved summaries are published with clear attribution to original sources, key learnings 
+                highlighted for quick reference, and structured human factors analysis for deeper understanding.
+            </p>
+        </section>
+        
+        <section class="mb-12">
+            <h2>Data Sources</h2>
+            <p>We aggregate findings from official sources including:</p>
+            
+            <div class="grid md:grid-cols-2 gap-6 not-prose mt-6">
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="text-2xl mr-2">🇬🇧</span>
+                        <h4 class="font-semibold text-gray-900">United Kingdom</h4>
+                    </div>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li>
+                            <a href="https://www.judiciary.uk/prevention-of-future-death-reports/" 
+                               class="text-blue-600 hover:underline" target="_blank" rel="noopener">
+                                Prevention of Future Deaths Reports
+                            </a>
+                            <p class="text-gray-500">Coroners' reports with recommendations to prevent future deaths</p>
+                        </li>
+                        <li>
+                            <a href="https://www.hssib.org.uk/" 
+                               class="text-blue-600 hover:underline" target="_blank" rel="noopener">
+                                HSSIB Investigations
+                            </a>
+                            <p class="text-gray-500">Healthcare Safety Investigation Branch reports</p>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="text-2xl mr-2">🇦🇺</span>
+                        <h4 class="font-semibold text-gray-900">Australia</h4>
+                    </div>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li>State Coroners Courts (VIC, NSW, QLD)</li>
+                        <li>Healthcare-related inquest findings</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="text-2xl mr-2">🇳🇿</span>
+                        <h4 class="font-semibold text-gray-900">New Zealand</h4>
+                    </div>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li>
+                            <a href="https://www.hdc.org.nz/" 
+                               class="text-blue-600 hover:underline" target="_blank" rel="noopener">
+                                Health and Disability Commissioner
+                            </a>
+                            <p class="text-gray-500">HDC decisions and recommendations</p>
+                        </li>
+                        <li>NZ Coronial Services</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <section class="mb-12">
+            <h2>SEIPS 2.0 Framework</h2>
+            <p>
+                Our analysis methodology is based on the <strong>Systems Engineering Initiative for Patient 
+                Safety (SEIPS)</strong> model developed by researchers at the University of Wisconsin-Madison. 
+                This framework recognises that patient safety outcomes result from complex interactions 
+                between people, tasks, technologies, and organisational factors.
+            </p>
+            <p>
+                Rather than focusing solely on individual errors, SEIPS encourages analysis of the broader 
+                work system and how its design contributes to both successes and failures. This systems 
+                thinking approach is essential for developing effective, sustainable safety improvements.
+            </p>
+            <p class="text-sm text-gray-500 mt-4">
+                Reference: Carayon, P., et al. (2014). SEIPS 2.0: A human factors framework for studying 
+                and improving the work of healthcare professionals and patients. <em>Ergonomics</em>, 57(3), 295-307.
+            </p>
+        </section>
+        
+        <section class="mb-12">
+            <h2>Important Disclaimers</h2>
+            <div class="bg-amber-50 border-l-4 border-amber-400 p-6 rounded-r-lg not-prose">
+                <ul class="text-sm text-amber-900 space-y-3">
+                    <li>
+                        <strong>Educational Purpose Only:</strong> Content is intended for educational purposes 
+                        and should not be used as a substitute for professional medical, legal, or clinical advice.
+                    </li>
+                    <li>
+                        <strong>AI-Generated Summaries:</strong> While all content undergoes human review, summaries 
+                        are AI-generated and may not capture all nuances of the original findings.
+                    </li>
+                    <li>
+                        <strong>Original Sources:</strong> For complete information, always refer to the original 
+                        coronial finding or investigation report linked in each post.
+                    </li>
+                    <li>
+                        <strong>Respect for Individuals:</strong> We aim to present findings in a way that respects 
+                        the dignity of those involved while maximising educational value for patient safety.
+                    </li>
+                </ul>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Stay Connected</h2>
+            <p>
+                Subscribe to our <a href="/feed.xml">RSS feed</a> to receive updates when new case studies 
+                are published. We aim to provide timely coverage of significant findings that can benefit 
+                healthcare practitioners across all disciplines.
+            </p>
+        </section>
+    </div>
+</div>
+{% endblock %}

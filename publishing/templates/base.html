@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="{{ site.language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ site.title }}{% endblock %}</title>
+    <meta name="description" content="{% block description %}{{ site.description }}{% endblock %}">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}{{ self.title() }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ site.description }}{% endblock %}">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:url" content="{% block og_url %}{{ site.base_url }}{% endblock %}">
+    <meta property="og:site_name" content="{{ site.title }}">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{% block canonical %}{{ site.base_url }}{% endblock %}">
+    
+    <!-- RSS Feed -->
+    <link rel="alternate" type="application/rss+xml" title="{{ site.title }} RSS Feed" href="{{ site.base_url }}/feed.xml">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/assets/css/main.css">
+    
+    {% block head_extra %}{% endblock %}
+    
+    <!-- JSON-LD Structured Data -->
+    {% block structured_data %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "{{ site.title }}",
+        "description": "{{ site.description }}",
+        "url": "{{ site.base_url }}"
+    }
+    </script>
+    {% endblock %}
+</head>
+<body class="min-h-screen bg-gray-50 flex flex-col">
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded">
+        Skip to main content
+    </a>
+    
+    <!-- Navigation -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="max-w-4xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <a href="/" class="flex items-center space-x-2">
+                    <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <span class="text-xl font-bold text-gray-900">Patient Safety Monitor</span>
+                </a>
+                
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
+                    <a href="/posts/" class="text-gray-600 hover:text-blue-600 transition-colors">Archive</a>
+                    <a href="/about/" class="text-gray-600 hover:text-blue-600 transition-colors">About</a>
+                    <div class="relative">
+                        <input type="search" 
+                               id="search-input"
+                               placeholder="Search..." 
+                               class="w-40 pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <svg class="absolute left-2.5 top-2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main id="main-content" class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-300 mt-16">
+        <div class="max-w-4xl mx-auto px-4 py-12">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-white font-semibold mb-4">About</h3>
+                    <p class="text-sm">
+                        Patient Safety Monitor aggregates learnings from coronial investigations 
+                        and patient safety incidents to help healthcare practitioners prevent 
+                        future patient harm.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="/" class="hover:text-white transition-colors">Home</a></li>
+                        <li><a href="/posts/" class="hover:text-white transition-colors">All Posts</a></li>
+                        <li><a href="/about/" class="hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="/feed.xml" class="hover:text-white transition-colors">RSS Feed</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Data Sources</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="https://www.judiciary.uk/prevention-of-future-death-reports/" class="hover:text-white transition-colors" target="_blank" rel="noopener">UK PFD Reports</a></li>
+                        <li><a href="https://www.hssib.org.uk/" class="hover:text-white transition-colors" target="_blank" rel="noopener">HSSIB</a></li>
+                        <li><a href="https://www.hdc.org.nz/" class="hover:text-white transition-colors" target="_blank" rel="noopener">NZ HDC</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-sm text-center">
+                <p>&copy; {{ generated_at.year }} Patient Safety Monitor. Content derived from public coronial findings.</p>
+                <p class="mt-2">
+                    Generated {{ generated_at.strftime('%Y-%m-%d %H:%M UTC') }}
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Search Results Overlay -->
+    <div id="search-results" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+        <div class="max-w-2xl mx-auto mt-20 bg-white rounded-lg shadow-xl max-h-96 overflow-auto">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="font-semibold">Search Results</h3>
+                <button id="close-search" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="search-results-list" class="p-4">
+                <!-- Results populated by JS -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="/assets/js/search.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

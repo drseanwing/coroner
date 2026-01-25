@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Data Sources</h1>
+        <p class="mt-1 text-sm text-gray-500">Configure and manage data collection sources</p>
+    </div>
+    
+    <!-- Sources Grid -->
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {% for source in sources %}
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <!-- Country flag -->
+                        <span class="text-2xl">
+                            {% if source.country == 'GB' %}🇬🇧
+                            {% elif source.country == 'AU' %}🇦🇺
+                            {% elif source.country == 'NZ' %}🇳🇿
+                            {% else %}🌐{% endif %}
+                        </span>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-medium text-gray-900">{{ source.name }}</h3>
+                        <p class="text-sm text-gray-500">{{ source.code }}</p>
+                    </div>
+                    <div id="source-status-{{ source.id }}">
+                        {% include "partials/source_status.html" %}
+                    </div>
+                </div>
+                
+                <dl class="mt-4 space-y-2">
+                    <div class="flex justify-between">
+                        <dt class="text-sm text-gray-500">Findings</dt>
+                        <dd class="text-sm font-medium text-gray-900">{{ source_counts.get(source.id, 0) }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-sm text-gray-500">Last Scraped</dt>
+                        <dd class="text-sm text-gray-900">{{ source.last_scraped_at|datetime if source.last_scraped_at else 'Never' }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-sm text-gray-500">Schedule</dt>
+                        <dd class="text-sm text-gray-900 font-mono">{{ source.schedule_cron }}</dd>
+                    </div>
+                </dl>
+            </div>
+            
+            <div class="bg-gray-50 px-5 py-3 flex justify-between">
+                <button type="button"
+                        hx-post="/sources/{{ source.id }}/toggle"
+                        hx-target="#source-status-{{ source.id }}"
+                        hx-swap="innerHTML"
+                        class="text-sm text-indigo-600 hover:text-indigo-500">
+                    Toggle Status
+                </button>
+                
+                <button type="button"
+                        hx-post="/sources/{{ source.id }}/trigger"
+                        hx-target="#trigger-status-{{ source.id }}"
+                        hx-swap="innerHTML"
+                        class="text-sm text-green-600 hover:text-green-500">
+                    Run Now
+                </button>
+            </div>
+            
+            <div id="trigger-status-{{ source.id }}" class="px-5 py-2"></div>
+        </div>
+        {% else %}
+        <div class="col-span-full bg-white rounded-lg shadow px-6 py-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No sources configured</h3>
+            <p class="mt-1 text-sm text-gray-500">Run the seed script to add default sources.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

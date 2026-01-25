@@ -1,0 +1,240 @@
+"""
+Patient Safety Monitor - Admin Dashboard Application
+
+FastAPI application providing a web interface for:
+- Reviewing AI-generated blog posts
+- Approving/rejecting content
+- Managing data sources
+- Viewing analytics
+
+Uses HTMX for dynamic interactions without a JavaScript framework.
+"""
+
+import logging
+import secrets
+from contextlib import asynccontextmanager
+from datetime import datetime
+from pathlib import Path
+from typing import Optional
+
+from fastapi import FastAPI, Request, Depends, HTTPException, status
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+
+from config.settings import get_settings
+from config.logging import setup_logging, get_logger
+from database.connection import init_database, get_session
+
+
+logger = get_logger(__name__)
+
+# =============================================================================
+# Application Factory
+# =============================================================================
+
+def create_app() -> FastAPI:
+    """
+    Create and configure the FastAPI application.
+    
+    Returns:
+        Configured FastAPI application
+    """
+    settings = get_settings()
+    
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        """Application lifespan handler for startup/shutdown."""
+        logger.info("=" * 60)
+        logger.info("Patient Safety Monitor - Admin Dashboard Starting")
+        logger.info("=" * 60)
+        
+        # Initialize database connection
+        if not init_database():
+            logger.error("Failed to initialize database connection")
+            raise RuntimeError("Database initialization failed")
+        
+        logger.info("Admin dashboard ready")
+        yield
+        
+        logger.info("Admin dashboard shutting down")
+    
+    app = FastAPI(
+        title="Patient Safety Monitor Admin",
+        description="Admin dashboard for reviewing and publishing patient safety findings",
+        version="1.0.0",
+        docs_url="/api/docs" if settings.debug else None,
+        redoc_url="/api/redoc" if settings.debug else None,
+        lifespan=lifespan,
+    )
+    
+    # Mount static files
+    static_path = Path(__file__).parent / "static"
+    if static_path.exists():
+        app.mount("/static", StaticFiles(directory=static_path), name="static")
+    
+    # Setup templates
+    templates_path = Path(__file__).parent / "templates"
+    templates = Jinja2Templates(directory=templates_path)
+    app.state.templates = templates
+    
+    # Add custom template filters
+    templates.env.filters["datetime"] = format_datetime
+    templates.env.filters["truncate_words"] = truncate_words
+    
+    # Include routes
+    from admin.routes import router as admin_router
+    from admin.api import router as api_router
+    
+    app.include_router(admin_router)
+    app.include_router(api_router, prefix="/api")
+    
+    return app
+
+
+# =============================================================================
+# Template Filters
+# =============================================================================
+
+def format_datetime(value: Optional[datetime], format_str: str = "%Y-%m-%d %H:%M") -> str:
+    """Format datetime for display in templates."""
+    if value is None:
+        return "—"
+    return value.strftime(format_str)
+
+
+def truncate_words(value: str, num_words: int = 30) -> str:
+    """Truncate text to a specified number of words."""
+    if not value:
+        return ""
+    words = value.split()
+    if len(words) <= num_words:
+        return value
+    return " ".join(words[:num_words]) + "..."
+
+
+# =============================================================================
+# Authentication
+# =============================================================================
+
+security = HTTPBasic()
+
+
+def get_current_user(
+    credentials: HTTPBasicCredentials = Depends(security),
+) -> str:
+    """
+    Validate HTTP Basic Auth credentials.
+    
+    Args:
+        credentials: HTTP Basic Auth credentials
+        
+    Returns:
+        Username if valid
+        
+    Raises:
+        HTTPException: If credentials are invalid
+    """
+    settings = get_settings()
+    
+    # Constant-time comparison to prevent timing attacks
+    correct_username = secrets.compare_digest(
+        credentials.username.encode("utf8"),
+        settings.admin_username.encode("utf8"),
+    )
+    correct_password = secrets.compare_digest(
+        credentials.password.encode("utf8"),
+        settings.admin_password.encode("utf8"),
+    )
+    
+    if not (correct_username and correct_password):
+        logger.warning(
+            "Failed login attempt",
+            extra={"username": credentials.username},
+        )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    
+    logger.debug(f"User authenticated: {credentials.username}")
+    return credentials.username
+
+
+# =============================================================================
+# Health Check
+# =============================================================================
+
+app = create_app()
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for container orchestration."""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "service": "admin-dashboard",
+    }
+
+
+@app.get("/")
+async def root():
+    """Redirect root to dashboard."""
+    return RedirectResponse(url="/dashboard", status_code=302)
+
+
+# =============================================================================
+# Error Handlers
+# =============================================================================
+
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc: HTTPException):
+    """Handle 404 errors with a custom page."""
+    templates = request.app.state.templates
+    return templates.TemplateResponse(
+        "error.html",
+        {
+            "request": request,
+            "error_code": 404,
+            "error_message": "Page not found",
+        },
+        status_code=404,
+    )
+
+
+@app.exception_handler(500)
+async def server_error_handler(request: Request, exc: Exception):
+    """Handle 500 errors with a custom page."""
+    logger.exception("Internal server error", extra={"path": request.url.path})
+    templates = request.app.state.templates
+    return templates.TemplateResponse(
+        "error.html",
+        {
+            "request": request,
+            "error_code": 500,
+            "error_message": "Internal server error",
+        },
+        status_code=500,
+    )
+
+
+# =============================================================================
+# Entry Point
+# =============================================================================
+
+if __name__ == "__main__":
+    import uvicorn
+    
+    setup_logging()
+    settings = get_settings()
+    
+    uvicorn.run(
+        "admin.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=settings.debug,
+        log_level=settings.log_level.lower(),
+    )

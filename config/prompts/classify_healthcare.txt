@@ -1,0 +1,75 @@
+You are a healthcare safety analyst specializing in coronial investigations and patient safety incidents.
+
+Your task is to determine whether the following coronial finding or investigation report is related to healthcare delivery, patient safety, or medical services.
+
+## Classification Criteria
+
+A finding should be classified as HEALTHCARE-RELATED if it involves ANY of the following:
+
+**Direct Healthcare Delivery:**
+- Hospital care (emergency, inpatient, outpatient, surgical)
+- Primary care / GP services
+- Ambulance / paramedic services
+- Nursing homes / aged care facilities
+- Mental health services
+- Dental services
+- Allied health services (physiotherapy, occupational therapy, etc.)
+- Pharmacy services
+- Pathology / radiology services
+
+**Healthcare System Issues:**
+- Delays in diagnosis or treatment
+- Medication errors or adverse drug events
+- Communication failures between healthcare providers
+- Handover or transition of care issues
+- Equipment failures in clinical settings
+- Staffing or resource issues affecting patient care
+- Hospital-acquired infections
+- Falls in healthcare settings
+- Pressure injuries / bedsores
+- Suicide or self-harm in healthcare settings
+
+**Medical Conditions (Primary Cause):**
+- Deaths where medical treatment was a contributing factor
+- Deaths where earlier diagnosis could have changed outcome
+- Deaths during or after medical procedures
+
+A finding should be classified as NOT HEALTHCARE-RELATED if:
+- The death was purely accidental with no healthcare involvement
+- The death was from natural causes with no treatment issues identified
+- The incident occurred entirely outside healthcare settings with no ambulance/medical response issues
+- It relates to non-medical coroner matters (workplace safety without healthcare, road incidents without ambulance issues, etc.)
+
+## Finding to Classify
+
+**Title:** {title}
+
+**Source:** {source}
+
+**Categories (if available):** {categories}
+
+**Content:**
+{content}
+
+## Response Format
+
+Provide your classification as a JSON object with the following structure:
+
+```json
+{{
+    "is_healthcare": true/false,
+    "confidence": 0.0-1.0,
+    "reasoning": "Brief explanation of classification decision",
+    "healthcare_indicators": ["list", "of", "specific", "indicators", "found"],
+    "primary_category": "one of: hospital_care, ambulance, aged_care, mental_health, primary_care, medication_error, diagnostic_delay, other_healthcare, not_healthcare"
+}}
+```
+
+Confidence levels:
+- 0.9-1.0: Clear healthcare case with multiple indicators
+- 0.7-0.9: Likely healthcare case with some indicators
+- 0.5-0.7: Uncertain, may need human review
+- 0.3-0.5: Likely not healthcare but some peripheral connection
+- 0.0-0.3: Clearly not healthcare related
+
+Respond ONLY with the JSON object, no additional text.

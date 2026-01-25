@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="sm:flex sm:items-center sm:justify-between">
+        <div>
+            <nav class="flex" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-4">
+                    <li>
+                        <a href="/review" class="text-gray-400 hover:text-gray-500">
+                            <svg class="flex-shrink-0 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="sr-only">Review Queue</span>
+                        </a>
+                    </li>
+                    <li>
+                        <span class="text-gray-500">Review Post</span>
+                    </li>
+                </ol>
+            </nav>
+            <h1 class="mt-2 text-2xl font-bold text-gray-900">{{ post.title }}</h1>
+        </div>
+        
+        <div class="mt-4 sm:mt-0 flex items-center space-x-2">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                {% if post.status.value == 'published' %}bg-green-100 text-green-800
+                {% elif post.status.value == 'pending_review' %}bg-orange-100 text-orange-800
+                {% elif post.status.value == 'rejected' %}bg-red-100 text-red-800
+                {% elif post.status.value == 'approved' %}bg-teal-100 text-teal-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ post.status.value|replace('_', ' ')|title }}
+            </span>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Generated Post -->
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Generated Post</h3>
+                <p class="mt-1 text-sm text-gray-500">AI-generated blog content ready for review</p>
+            </div>
+            
+            <div class="px-4 py-5 sm:p-6">
+                <!-- Title -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Title</label>
+                    <input type="text" 
+                           id="post-title"
+                           value="{{ post.title }}"
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                
+                <!-- Content -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Content (Markdown)</label>
+                    <textarea id="post-content"
+                              rows="20"
+                              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm font-mono text-sm">{{ post.content_markdown }}</textarea>
+                </div>
+                
+                <!-- Tags -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Tags</label>
+                    <input type="text" 
+                           id="post-tags"
+                           value="{{ post.tags|join(', ') if post.tags else '' }}"
+                           placeholder="communication, hospital, medication"
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <p class="mt-1 text-xs text-gray-500">Comma-separated list of tags</p>
+                </div>
+                
+                <!-- Save Changes -->
+                <div class="flex justify-end">
+                    <button type="button"
+                            hx-post="/review/{{ post.id }}/edit"
+                            hx-target="#action-status"
+                            hx-include="#post-title, #post-content, #post-tags"
+                            class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <span class="htmx-indicator mr-2">
+                            <svg class="animate-spin h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                        </span>
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Source Finding -->
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Source Finding</h3>
+                <p class="mt-1 text-sm text-gray-500">Original coronial finding for reference</p>
+            </div>
+            
+            <div class="px-4 py-5 sm:p-6 space-y-4">
+                {% if finding %}
+                <!-- Finding Details -->
+                <dl class="grid grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Source</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ source.name if source else 'Unknown' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Date of Finding</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ finding.date_of_finding|datetime('%Y-%m-%d') if finding.date_of_finding else '—' }}</dd>
+                    </div>
+                    {% if finding.coroner_name %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Coroner</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ finding.coroner_name }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if finding.deceased_name %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Deceased</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ finding.deceased_name }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+                
+                <!-- Original URL -->
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Original Source</dt>
+                    <dd class="mt-1">
+                        <a href="{{ finding.source_url }}" target="_blank" 
+                           class="text-sm text-indigo-600 hover:text-indigo-500">
+                            {{ finding.source_url|truncate(60) }}
+                            <svg class="inline h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </a>
+                    </dd>
+                </div>
+                
+                <!-- Original Content -->
+                <div>
+                    <dt class="text-sm font-medium text-gray-500 mb-2">Original Content</dt>
+                    <dd class="mt-1 max-h-96 overflow-y-auto bg-gray-50 rounded-md p-4">
+                        <pre class="text-sm text-gray-700 whitespace-pre-wrap">{{ finding.content_text|truncate(5000) if finding.content_text else 'No content available' }}</pre>
+                    </dd>
+                </div>
+                {% else %}
+                <p class="text-gray-500">Source finding not available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Human Factors Analysis -->
+    {% if analysis and analysis.human_factors %}
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Human Factors Analysis</h3>
+            <p class="mt-1 text-sm text-gray-500">SEIPS 2.0 framework analysis</p>
+        </div>
+        
+        <div class="px-4 py-5 sm:p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for domain, factors in analysis.human_factors.items() %}
+                {% if factors %}
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-900 capitalize mb-2">
+                        {{ domain|replace('_', ' ') }}
+                    </h4>
+                    <ul class="space-y-2">
+                        {% for factor in factors %}
+                        <li class="text-sm">
+                            <span class="font-medium text-gray-700">{{ factor.factor }}</span>
+                            {% if factor.severity %}
+                            <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                                {% if factor.severity == 'high' %}bg-red-100 text-red-800
+                                {% elif factor.severity == 'medium' %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ factor.severity }}
+                            </span>
+                            {% endif %}
+                            {% if factor.description %}
+                            <p class="text-gray-500 mt-1">{{ factor.description }}</p>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Action Buttons -->
+    <div class="bg-white shadow rounded-lg px-4 py-5 sm:p-6">
+        <div id="action-status" class="mb-4"></div>
+        
+        <div class="flex flex-wrap gap-4">
+            {% if post.status.value in ['pending_review', 'draft'] %}
+            <!-- Approve -->
+            <button type="button"
+                    hx-post="/review/{{ post.id }}/approve"
+                    hx-target="#action-status"
+                    hx-vals='{"publish_now": false}'
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                Approve
+            </button>
+            
+            <!-- Approve & Publish -->
+            <button type="button"
+                    hx-post="/review/{{ post.id }}/approve"
+                    hx-target="#action-status"
+                    hx-vals='{"publish_now": true}'
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Approve & Publish
+            </button>
+            
+            <!-- Reject -->
+            <div x-data="{ showReject: false }" class="relative">
+                <button type="button"
+                        @click="showReject = !showReject"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Reject
+                </button>
+                
+                <!-- Reject Form -->
+                <div x-show="showReject" 
+                     x-transition
+                     class="absolute z-10 mt-2 w-72 bg-white rounded-md shadow-lg p-4 border">
+                    <form hx-post="/review/{{ post.id }}/reject"
+                          hx-target="#action-status">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Reason for rejection
+                        </label>
+                        <textarea name="reason" 
+                                  required
+                                  rows="3"
+                                  class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                                  placeholder="Enter reason..."></textarea>
+                        <div class="mt-3 flex justify-end space-x-2">
+                            <button type="button" 
+                                    @click="showReject = false"
+                                    class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                    class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">
+                                Confirm Reject
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if post.status.value == 'approved' %}
+            <!-- Publish Now -->
+            <button type="button"
+                    hx-post="/review/{{ post.id }}/approve"
+                    hx-target="#action-status"
+                    hx-vals='{"publish_now": true}'
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                Publish Now
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<!-- Alpine.js for reject dropdown -->
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}
+{% endblock %}

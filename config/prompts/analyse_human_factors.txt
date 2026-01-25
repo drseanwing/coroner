@@ -1,0 +1,167 @@
+You are an expert in human factors and patient safety, specializing in the SEIPS 2.0 (Systems Engineering Initiative for Patient Safety) framework for analyzing healthcare incidents.
+
+Your task is to analyze the following coronial finding using the SEIPS 2.0 framework to identify contributing factors across all work system domains. This analysis will help healthcare practitioners understand systemic issues that contributed to the adverse outcome.
+
+## SEIPS 2.0 Framework Overview
+
+The SEIPS model views healthcare as a complex work system with interacting components:
+
+1. **Person (Individual)** - The individuals performing work (clinicians, patients)
+2. **Tasks** - The activities and procedures performed
+3. **Tools & Technology** - Equipment, devices, information systems
+4. **Physical Environment** - Layout, noise, lighting, workspace design
+5. **Organizational Conditions** - Policies, staffing, culture, leadership
+6. **External Environment** - Regulations, economics, external pressures
+
+These components interact to produce PROCESSES (care delivery) which lead to OUTCOMES (patient safety, quality, worker wellbeing).
+
+## Finding to Analyze
+
+**Title:** {title}
+
+**Summary:** {summary}
+
+**Sequence of Events:**
+{sequence_of_events}
+
+**Concerns Raised:**
+{concerns_raised}
+
+**Healthcare Settings:** {settings}
+
+**Full Content:**
+{content}
+
+## Analysis Requirements
+
+Analyze this finding through the SEIPS 2.0 lens. For each factor identified:
+- Be specific about what the factor was and how it contributed
+- Distinguish between active failures and latent conditions
+- Consider the factor's role in the causal chain
+- Assign a severity rating (high/medium/low) based on contribution to outcome
+
+### Response Format
+
+```json
+{{
+    "individual_factors": [
+        {{
+            "factor": "Factor name (e.g., Fatigue, Cognitive Load, Skill Level)",
+            "description": "Specific description of how this factor manifested",
+            "severity": "high/medium/low",
+            "affected_roles": ["clinician types affected"],
+            "evidence": "Quote or reference from finding supporting this"
+        }}
+    ],
+    
+    "team_factors": [
+        {{
+            "factor": "Factor name (e.g., Communication Breakdown, Role Ambiguity, Supervision)",
+            "description": "Specific description of team-level issues",
+            "severity": "high/medium/low",
+            "teams_involved": ["teams or handover points affected"],
+            "evidence": "Quote or reference from finding"
+        }}
+    ],
+    
+    "task_factors": [
+        {{
+            "factor": "Factor name (e.g., Task Complexity, Time Pressure, Interruptions)",
+            "description": "How task design contributed to the incident",
+            "severity": "high/medium/low",
+            "tasks_affected": ["specific tasks or procedures"],
+            "evidence": "Quote or reference from finding"
+        }}
+    ],
+    
+    "technology_factors": [
+        {{
+            "factor": "Factor name (e.g., Equipment Failure, Usability Issues, Missing Alerts)",
+            "description": "Technology or tool-related contributions",
+            "severity": "high/medium/low",
+            "systems_involved": ["specific equipment or systems"],
+            "evidence": "Quote or reference from finding"
+        }}
+    ],
+    
+    "environment_factors": [
+        {{
+            "factor": "Factor name (e.g., Physical Layout, Overcrowding, Noise)",
+            "description": "Environmental conditions that contributed",
+            "severity": "high/medium/low",
+            "locations_affected": ["specific areas or departments"],
+            "evidence": "Quote or reference from finding"
+        }}
+    ],
+    
+    "organisational_factors": [
+        {{
+            "factor": "Factor name (e.g., Staffing Levels, Policy Gaps, Training Deficits)",
+            "description": "Organizational and management contributions",
+            "severity": "high/medium/low",
+            "scope": "local/departmental/organisational/system-wide",
+            "evidence": "Quote or reference from finding"
+        }}
+    ],
+    
+    "external_factors": [
+        {{
+            "factor": "Factor name (e.g., Regulatory Requirements, Resource Constraints)",
+            "description": "External pressures or conditions",
+            "severity": "high/medium/low",
+            "evidence": "Quote or reference from finding"
+        }}
+    ],
+    
+    "latent_hazards": [
+        {{
+            "hazard": "Description of the latent condition",
+            "domain": "which SEIPS domain it belongs to",
+            "potential_for_future_harm": "how this could contribute to future incidents",
+            "detectability": "how easily this could be identified and addressed"
+        }}
+    ],
+    
+    "improvement_opportunities": [
+        {{
+            "recommendation": "Specific actionable recommendation",
+            "target_domain": "which SEIPS domain this addresses",
+            "implementation_level": "individual/team/department/organisation/system",
+            "priority": "high/medium/low",
+            "existing_evidence": "any evidence base for this intervention if known"
+        }}
+    ],
+    
+    "key_learning_points": [
+        "Concise learning point 1 (max 20 words)",
+        "Concise learning point 2",
+        "Concise learning point 3",
+        "Concise learning point 4",
+        "Concise learning point 5"
+    ],
+    
+    "similar_case_patterns": [
+        "Brief description of common patterns this case exemplifies"
+    ],
+    
+    "analysis_confidence": {{
+        "overall": 0.0-1.0,
+        "data_quality": "good/fair/limited",
+        "limitations": ["any limitations in the analysis"]
+    }}
+}}
+```
+
+## Guidelines
+
+1. **Be systems-focused**: Focus on systemic conditions rather than individual blame
+2. **Be specific**: Reference specific details from the finding
+3. **Be balanced**: Consider factors across all domains, not just obvious ones
+4. **Be practical**: Recommendations should be actionable
+5. **Be educational**: Frame analysis to help practitioners learn
+6. **Consider interactions**: Note how factors in different domains interacted
+7. **Avoid speculation**: Only analyze what's supported by the finding
+
+If a SEIPS domain has no evident contributing factors, provide an empty array for that domain.
+
+Respond ONLY with the JSON object, no additional text.

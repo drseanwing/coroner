@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="sm:flex sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Findings</h1>
+            <p class="mt-1 text-sm text-gray-500">Raw coronial findings collected from sources</p>
+        </div>
+        
+        <!-- Filters -->
+        <div class="mt-4 sm:mt-0 flex space-x-4">
+            <select 
+                onchange="updateFilters()"
+                id="status-filter"
+                class="block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                <option value="">All Statuses</option>
+                <option value="new" {% if current_status == 'new' %}selected{% endif %}>New</option>
+                <option value="classified" {% if current_status == 'classified' %}selected{% endif %}>Classified</option>
+                <option value="analysed" {% if current_status == 'analysed' %}selected{% endif %}>Analysed</option>
+                <option value="published" {% if current_status == 'published' %}selected{% endif %}>Published</option>
+                <option value="excluded" {% if current_status == 'excluded' %}selected{% endif %}>Excluded</option>
+            </select>
+            
+            <select 
+                onchange="updateFilters()"
+                id="source-filter"
+                class="block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                <option value="">All Sources</option>
+                {% for source in sources %}
+                <option value="{{ source.code }}" {% if current_source == source.code %}selected{% endif %}>
+                    {{ source.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    
+    <!-- Findings Table -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Finding
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Source
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Healthcare
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for finding in findings %}
+                <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='/findings/{{ finding.id }}'">
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-medium text-gray-900 truncate max-w-md">
+                            {{ finding.title|truncate_words(12) }}
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            {{ finding.external_id }}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm text-gray-900">{{ finding.source.name if finding.source else 'Unknown' }}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ finding.date_of_finding|datetime('%Y-%m-%d') if finding.date_of_finding else '—' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                            {% if finding.status.value == 'new' %}bg-blue-100 text-blue-800
+                            {% elif finding.status.value == 'classified' %}bg-yellow-100 text-yellow-800
+                            {% elif finding.status.value == 'analysed' %}bg-purple-100 text-purple-800
+                            {% elif finding.status.value == 'published' %}bg-green-100 text-green-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ finding.status.value|title }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if finding.is_healthcare %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Yes ({{ "%.0f"|format(finding.healthcare_confidence * 100 if finding.healthcare_confidence else 0) }}%)
+                        </span>
+                        {% elif finding.is_healthcare == False %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            No
+                        </span>
+                        {% else %}
+                        <span class="text-sm text-gray-400">Pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                        No findings found matching the current filters
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <nav class="flex items-center justify-between">
+        <div class="flex w-0 flex-1">
+            {% if page > 1 %}
+            <a href="/findings?status={{ current_status or '' }}&source={{ current_source or '' }}&page={{ page - 1 }}" 
+               class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                Previous
+            </a>
+            {% endif %}
+        </div>
+        
+        <div class="text-sm text-gray-700">
+            Page {{ page }} of {{ total_pages }} ({{ total }} total)
+        </div>
+        
+        <div class="flex w-0 flex-1 justify-end">
+            {% if page < total_pages %}
+            <a href="/findings?status={{ current_status or '' }}&source={{ current_source or '' }}&page={{ page + 1 }}" 
+               class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                Next
+            </a>
+            {% endif %}
+        </div>
+    </nav>
+    {% endif %}
+</div>
+
+<script>
+function updateFilters() {
+    const status = document.getElementById('status-filter').value;
+    const source = document.getElementById('source-filter').value;
+    let url = '/findings?';
+    if (status) url += 'status=' + status + '&';
+    if (source) url += 'source=' + source + '&';
+    window.location.href = url.slice(0, -1);
+}
+</script>
+{% endblock %}

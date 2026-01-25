@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div>
+        <nav class="flex" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+                <li>
+                    <a href="/findings" class="text-gray-400 hover:text-gray-500">
+                        <svg class="flex-shrink-0 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="sr-only">Findings</span>
+                    </a>
+                </li>
+                <li>
+                    <span class="text-gray-500">Finding Detail</span>
+                </li>
+            </ol>
+        </nav>
+        <div class="mt-2 sm:flex sm:items-center sm:justify-between">
+            <h1 class="text-2xl font-bold text-gray-900">{{ finding.title }}</h1>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                {% if finding.status.value == 'new' %}bg-blue-100 text-blue-800
+                {% elif finding.status.value == 'classified' %}bg-yellow-100 text-yellow-800
+                {% elif finding.status.value == 'analysed' %}bg-purple-100 text-purple-800
+                {% elif finding.status.value == 'published' %}bg-green-100 text-green-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ finding.status.value|title }}
+            </span>
+        </div>
+    </div>
+    
+    <!-- Finding Details -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Finding Information</h3>
+        </div>
+        <div class="px-4 py-5 sm:p-6">
+            <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">External ID</dt>
+                    <dd class="mt-1 text-sm text-gray-900 font-mono">{{ finding.external_id }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Source</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ finding.source.name if finding.source else 'Unknown' }}</dd>
+                </div>
+                {% if finding.date_of_finding %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Date of Finding</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ finding.date_of_finding|datetime('%Y-%m-%d') }}</dd>
+                </div>
+                {% endif %}
+                {% if finding.date_of_death %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Date of Death</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ finding.date_of_death|datetime('%Y-%m-%d') }}</dd>
+                </div>
+                {% endif %}
+                {% if finding.coroner_name %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Coroner</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ finding.coroner_name }}</dd>
+                </div>
+                {% endif %}
+                {% if finding.deceased_name %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Deceased</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ finding.deceased_name }}</dd>
+                </div>
+                {% endif %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Healthcare Classification</dt>
+                    <dd class="mt-1">
+                        {% if finding.is_healthcare %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Healthcare Related ({{ "%.0f"|format(finding.healthcare_confidence * 100 if finding.healthcare_confidence else 0) }}% confidence)
+                        </span>
+                        {% elif finding.is_healthcare == False %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            Not Healthcare Related
+                        </span>
+                        {% else %}
+                        <span class="text-sm text-gray-500">Pending classification</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Source URL</dt>
+                    <dd class="mt-1">
+                        <a href="{{ finding.source_url }}" target="_blank" class="text-sm text-indigo-600 hover:text-indigo-500">
+                            {{ finding.source_url|truncate(60) }}
+                            <svg class="inline h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </a>
+                    </dd>
+                </div>
+                {% if finding.categories %}
+                <div class="sm:col-span-2">
+                    <dt class="text-sm font-medium text-gray-500">Categories</dt>
+                    <dd class="mt-1 flex flex-wrap gap-2">
+                        {% for category in finding.categories %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            {{ category }}
+                        </span>
+                        {% endfor %}
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+    
+    <!-- Content -->
+    {% if finding.content_text %}
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Content</h3>
+        </div>
+        <div class="px-4 py-5 sm:p-6">
+            <div class="max-h-96 overflow-y-auto bg-gray-50 rounded-md p-4">
+                <pre class="text-sm text-gray-700 whitespace-pre-wrap">{{ finding.content_text }}</pre>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Analyses -->
+    {% if analyses %}
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Analyses</h3>
+            <p class="mt-1 text-sm text-gray-500">{{ analyses|length }} analysis record(s)</p>
+        </div>
+        <div class="divide-y divide-gray-200">
+            {% for analysis in analyses %}
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-sm font-medium text-gray-900">{{ analysis.llm_provider.value|title }}</span>
+                        <span class="text-sm text-gray-500">/ {{ analysis.llm_model }}</span>
+                    </div>
+                    <div class="text-right text-sm text-gray-500">
+                        <div>{{ analysis.created_at|datetime }}</div>
+                        <div>{{ analysis.tokens_input + analysis.tokens_output if analysis.tokens_input and analysis.tokens_output else 0 }} tokens</div>
+                        <div>${{ "%.4f"|format(analysis.cost_usd or 0) }}</div>
+                    </div>
+                </div>
+                
+                {% if analysis.summary %}
+                <div class="mb-4">
+                    <h4 class="text-sm font-medium text-gray-700 mb-1">Summary</h4>
+                    <p class="text-sm text-gray-600">{{ analysis.summary }}</p>
+                </div>
+                {% endif %}
+                
+                {% if analysis.key_learnings %}
+                <div class="mb-4">
+                    <h4 class="text-sm font-medium text-gray-700 mb-1">Key Learnings</h4>
+                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                        {% for learning in analysis.key_learnings %}
+                        <li>{{ learning }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                {% if analysis.posts %}
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Generated Post</h4>
+                    {% for post in analysis.posts %}
+                    <a href="/review/{{ post.id }}" class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-500">
+                        {{ post.title|truncate_words(10) }}
+                        <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tag }} | {{ site.title }}{% endblock %}
+{% block description %}{{ posts | length }} patient safety case {{ 'study' if posts | length == 1 else 'studies' }} tagged with "{{ tag }}".{% endblock %}
+{% block canonical %}{{ site.base_url }}/tags/{{ tag | lower | replace(' ', '-') }}/{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <header class="mb-8">
+        <nav class="text-sm text-gray-500 mb-4">
+            <a href="/" class="hover:text-blue-600">Home</a>
+            <span class="mx-2">/</span>
+            <span>Tags</span>
+            <span class="mx-2">/</span>
+            <span class="text-gray-900">{{ tag }}</span>
+        </nav>
+        
+        <div class="flex items-center gap-4">
+            <span class="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium text-lg">
+                {{ tag }}
+            </span>
+            <div class="text-gray-600">
+                {{ posts | length }} {{ 'post' if posts | length == 1 else 'posts' }}
+            </div>
+        </div>
+    </header>
+    
+    <!-- Posts -->
+    {% if posts %}
+    <div class="space-y-6">
+        {% for post in posts %}
+        <article class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+            <div class="p-6">
+                <div class="flex items-center text-sm text-gray-500 mb-2">
+                    <time datetime="{{ post.published_at.isoformat() if post.published_at else '' }}">
+                        {{ post.published_at | datetime if post.published_at else 'Unpublished' }}
+                    </time>
+                    {% if post.analysis and post.analysis.finding and post.analysis.finding.source %}
+                    <span class="mx-2">•</span>
+                    <span>{{ post.analysis.finding.source.name }}</span>
+                    {% endif %}
+                </div>
+                
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                    <a href="/posts/{{ post.slug }}/" class="hover:text-blue-600 transition-colors">
+                        {{ post.title }}
+                    </a>
+                </h2>
+                
+                {% if post.excerpt %}
+                <p class="text-gray-600 mb-4 line-clamp-2">
+                    {{ post.excerpt }}
+                </p>
+                {% endif %}
+                
+                {% if post.tags %}
+                <div class="flex flex-wrap gap-2">
+                    {% for t in post.tags %}
+                    <a href="/tags/{{ t | lower | replace(' ', '-') }}/" 
+                       class="px-2 py-1 text-xs rounded transition-colors
+                              {% if t == tag %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+                        {{ t }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
+        <svg class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        </svg>
+        <p class="text-gray-600">No posts with this tag yet.</p>
+    </div>
+    {% endif %}
+    
+    <!-- Back to all posts -->
+    <nav class="mt-8 pt-8 border-t border-gray-200">
+        <a href="/posts/" class="text-blue-600 hover:text-blue-800 inline-flex items-center">
+            <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            All Posts
+        </a>
+    </nav>
+</div>
+{% endblock %}

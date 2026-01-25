@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p class="mt-1 text-sm text-gray-500">Overview of patient safety monitor activity</p>
+    </div>
+    
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- Pending Review -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Pending Review</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">{{ stats.pending_review }}</div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <a href="/review" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                    View review queue →
+                </a>
+            </div>
+        </div>
+        
+        <!-- Published Posts -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Published Posts</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">{{ stats.published_posts }}</div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <a href="/review?status=published" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                    View published →
+                </a>
+            </div>
+        </div>
+        
+        <!-- New Findings -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">New Findings</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">{{ stats.new_findings }}</div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <a href="/findings?status=new" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                    View new findings →
+                </a>
+            </div>
+        </div>
+        
+        <!-- Total Findings -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Findings</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">{{ stats.total_findings }}</div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <a href="/findings" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                    View all findings →
+                </a>
+            </div>
+        </div>
+        
+        <!-- Healthcare Findings -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Healthcare Related</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">{{ stats.healthcare_findings }}</div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <span class="text-sm text-gray-500">
+                    {{ "%.1f"|format(stats.healthcare_findings / stats.total_findings * 100 if stats.total_findings else 0) }}% of total
+                </span>
+            </div>
+        </div>
+        
+        <!-- Active Sources -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Active Sources</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">{{ stats.active_sources }}</div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <a href="/sources" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                    Manage sources →
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <!-- Recent Posts -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Posts</h3>
+            </div>
+            <ul class="divide-y divide-gray-200">
+                {% for post in recent_posts %}
+                <li class="px-4 py-4 hover:bg-gray-50">
+                    <a href="/review/{{ post.id }}" class="block">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-medium text-indigo-600 truncate">
+                                {{ post.title|truncate_words(10) }}
+                            </p>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if post.status.value == 'published' %}bg-green-100 text-green-800
+                                {% elif post.status.value == 'pending_review' %}bg-orange-100 text-orange-800
+                                {% elif post.status.value == 'rejected' %}bg-red-100 text-red-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ post.status.value|replace('_', ' ')|title }}
+                            </span>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Created {{ post.created_at|datetime }}
+                        </p>
+                    </a>
+                </li>
+                {% else %}
+                <li class="px-4 py-8 text-center text-gray-500">
+                    No posts yet
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <!-- Recent Findings -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Findings</h3>
+            </div>
+            <ul class="divide-y divide-gray-200">
+                {% for finding in recent_findings %}
+                <li class="px-4 py-4 hover:bg-gray-50">
+                    <a href="/findings/{{ finding.id }}" class="block">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-medium text-gray-900 truncate">
+                                {{ finding.title|truncate_words(10) }}
+                            </p>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if finding.status.value == 'new' %}bg-blue-100 text-blue-800
+                                {% elif finding.status.value == 'classified' %}bg-yellow-100 text-yellow-800
+                                {% elif finding.status.value == 'analysed' %}bg-purple-100 text-purple-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ finding.status.value|title }}
+                            </span>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">
+                            {{ finding.source.name if finding.source else 'Unknown source' }}
+                            {% if finding.is_healthcare %}
+                            <span class="text-green-600">• Healthcare</span>
+                            {% endif %}
+                        </p>
+                    </a>
+                </li>
+                {% else %}
+                <li class="px-4 py-8 text-center text-gray-500">
+                    No findings yet
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
