@@ -22,8 +22,16 @@ import logging
 import os
 from dataclasses import dataclass, field
 from datetime import datetime
+from io import BytesIO
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
+
+try:
+    import paramiko
+    SFTP_AVAILABLE = True
+except ImportError:
+    SFTP_AVAILABLE = False
+    paramiko = None
 
 from config.settings import get_settings
 from config.logging import get_logger
@@ -112,13 +120,20 @@ class BlogDeployer:
         self.settings = get_settings()
         self.source_dir = source_dir or Path("data/public_html")
         self.remote_dir = remote_dir.rstrip("/")
-        
-        # FTP connection
+
+        # Connection attributes
         self._ftp: Optional[ftplib.FTP] = None
-        
+        self._ssh: Optional["paramiko.SSHClient"] = None
+        self._sftp: Optional["paramiko.SFTPClient"] = None
+
         # Track local and remote manifests
         self._local_manifest: Optional[FileManifest] = None
         self._remote_manifest: Optional[FileManifest] = None
+
+    @property
+    def _is_sftp(self) -> bool:
+        """Check if connection should use SFTP (port 22) instead of FTP."""
+        return self.settings.ftp_port == 22
     
     def deploy(
         self,
@@ -197,10 +212,13 @@ class BlogDeployer:
                     self._save_remote_manifest()
             
         except ftplib.all_errors as e:
+            # FTP-specific errors
             logger.exception(f"FTP error during deployment: {e}")
             result.add_error(f"FTP error: {e}")
         except Exception as e:
-            logger.exception(f"Deployment failed: {e}")
+            # Catch SFTP and other errors
+            protocol = "SFTP" if self._is_sftp else "Unknown"
+            logger.exception(f"{protocol} error during deployment: {e}")
             result.add_error(f"Deployment failed: {e}")
         finally:
             self._disconnect()
@@ -230,27 +248,63 @@ class BlogDeployer:
         )
     
     def _connect(self) -> None:
-        """Connect to FTP server."""
-        logger.debug(f"Connecting to FTP: {self.settings.ftp_host}")
-        
-        self._ftp = ftplib.FTP()
-        self._ftp.connect(
-            host=self.settings.ftp_host,
-            port=self.settings.ftp_port or 21,
-            timeout=30,
-        )
-        self._ftp.login(
-            user=self.settings.ftp_username,
-            passwd=self.settings.ftp_password,
-        )
-        
-        # Switch to binary mode
-        self._ftp.voidcmd("TYPE I")
-        
-        logger.debug("FTP connection established")
+        """Connect to FTP or SFTP server based on port."""
+        if self._is_sftp:
+            if not SFTP_AVAILABLE:
+                raise RuntimeError("paramiko is required for SFTP support. Install with: pip install paramiko>=3.4.0")
+
+            logger.debug(f"Connecting to SFTP: {self.settings.ftp_host}:{self.settings.ftp_port}")
+
+            self._ssh = paramiko.SSHClient()
+            # Load system host keys for security; use WarningPolicy for unknown hosts
+            self._ssh.load_system_host_keys()
+            self._ssh.set_missing_host_key_policy(paramiko.WarningPolicy())
+            self._ssh.connect(
+                hostname=self.settings.ftp_host,
+                port=self.settings.ftp_port,
+                username=self.settings.ftp_username,
+                password=self.settings.ftp_password,
+                timeout=30,
+            )
+            self._sftp = self._ssh.open_sftp()
+
+            logger.debug("SFTP connection established")
+        else:
+            logger.debug(f"Connecting to FTP: {self.settings.ftp_host}")
+
+            self._ftp = ftplib.FTP()
+            self._ftp.connect(
+                host=self.settings.ftp_host,
+                port=self.settings.ftp_port or 21,
+                timeout=30,
+            )
+            self._ftp.login(
+                user=self.settings.ftp_username,
+                passwd=self.settings.ftp_password,
+            )
+
+            # Switch to binary mode
+            self._ftp.voidcmd("TYPE I")
+
+            logger.debug("FTP connection established")
     
     def _disconnect(self) -> None:
-        """Disconnect from FTP server."""
+        """Disconnect from FTP or SFTP server."""
+        if self._sftp:
+            try:
+                self._sftp.close()
+            except Exception:
+                pass
+            self._sftp = None
+
+        if self._ssh:
+            try:
+                self._ssh.close()
+            except Exception:
+                pass
+            self._ssh = None
+            logger.debug("SFTP disconnected")
+
         if self._ftp:
             try:
                 self._ftp.quit()
@@ -278,41 +332,98 @@ class BlogDeployer:
         return manifest
     
     def _hash_file(self, file_path: Path) -> str:
-        """Calculate MD5 hash of a file."""
-        hasher = hashlib.md5()
+        """Calculate SHA-256 hash of a file for change detection."""
+        hasher = hashlib.sha256()
         with open(file_path, "rb") as f:
             for chunk in iter(lambda: f.read(8192), b""):
                 hasher.update(chunk)
         return hasher.hexdigest()
+
+    def _put_file(self, local_path: Path, remote_path: str) -> None:
+        """Upload file using FTP or SFTP."""
+        if self._is_sftp:
+            if not self._sftp:
+                raise RuntimeError("Not connected to SFTP")
+            self._sftp.put(str(local_path), remote_path)
+        else:
+            if not self._ftp:
+                raise RuntimeError("Not connected to FTP")
+            with open(local_path, "rb") as f:
+                self._ftp.storbinary(f"STOR {remote_path}", f)
+
+    def _delete_remote(self, remote_path: str) -> None:
+        """Delete remote file using FTP or SFTP."""
+        if self._is_sftp:
+            if not self._sftp:
+                raise RuntimeError("Not connected to SFTP")
+            self._sftp.remove(remote_path)
+        else:
+            if not self._ftp:
+                raise RuntimeError("Not connected to FTP")
+            self._ftp.delete(remote_path)
+
+    def _make_remote_dir(self, path: str) -> None:
+        """Create remote directory using FTP or SFTP."""
+        if self._is_sftp:
+            if not self._sftp:
+                raise RuntimeError("Not connected to SFTP")
+            try:
+                self._sftp.stat(path)
+            except (FileNotFoundError, IOError):
+                self._sftp.mkdir(path)
+        else:
+            if not self._ftp:
+                raise RuntimeError("Not connected to FTP")
+            self._ftp.mkd(path)
+
+    def _get_file_content(self, remote_path: str) -> str:
+        """Get file content from remote server using FTP or SFTP."""
+        if self._is_sftp:
+            if not self._sftp:
+                raise RuntimeError("Not connected to SFTP")
+            with self._sftp.open(remote_path, "r") as f:
+                return f.read()
+        else:
+            if not self._ftp:
+                raise RuntimeError("Not connected to FTP")
+            lines = []
+            self._ftp.retrlines(f"RETR {remote_path}", lines.append)
+            return "\n".join(lines)
     
     def _load_remote_manifest(self) -> FileManifest:
         """Load manifest from remote server."""
-        if not self._ftp:
+        if not self._ftp and not self._sftp:
             return FileManifest()
-        
+
         manifest_path = f"{self.remote_dir}/{self.MANIFEST_FILE}"
-        
+
         try:
-            lines = []
-            self._ftp.retrlines(f"RETR {manifest_path}", lines.append)
-            data = "\n".join(lines)
+            data = self._get_file_content(manifest_path)
             manifest = FileManifest.from_json(data)
             logger.debug(f"Loaded remote manifest: {len(manifest.files)} files")
             return manifest
-        except ftplib.error_perm:
+        except (ftplib.error_perm, FileNotFoundError, IOError):
             logger.debug("No remote manifest found, will do full deployment")
             return FileManifest()
     
     def _save_remote_manifest(self) -> None:
         """Save manifest to remote server."""
-        if not self._ftp or not self._local_manifest:
+        if (not self._ftp and not self._sftp) or not self._local_manifest:
             return
-        
+
         manifest_path = f"{self.remote_dir}/{self.MANIFEST_FILE}"
         data = self._local_manifest.to_json().encode("utf-8")
-        
-        from io import BytesIO
-        self._ftp.storbinary(f"STOR {manifest_path}", BytesIO(data))
+
+        if self._is_sftp:
+            if not self._sftp:
+                raise RuntimeError("Not connected to SFTP")
+            with self._sftp.open(manifest_path, "w") as f:
+                f.write(data.decode("utf-8"))
+        else:
+            if not self._ftp:
+                raise RuntimeError("Not connected to FTP")
+            self._ftp.storbinary(f"STOR {manifest_path}", BytesIO(data))
+
         logger.debug("Saved remote manifest")
     
     def _calculate_changes(self) -> tuple[list[str], list[str]]:
@@ -366,26 +477,26 @@ class BlogDeployer:
             try:
                 local_path = self.source_dir / file_path
                 remote_path = f"{self.remote_dir}/{file_path}"
-                
+
                 self._upload_file(local_path, remote_path)
-                
+
                 result.files_uploaded += 1
                 result.bytes_transferred += local_path.stat().st_size
-                
+
                 logger.debug(f"Uploaded: {file_path}")
-                
+
             except Exception as e:
                 logger.error(f"Failed to upload {file_path}: {e}")
                 result.warnings.append(f"Upload failed: {file_path}")
-        
+
         # Delete orphaned files
         for file_path in to_delete:
             try:
                 remote_path = f"{self.remote_dir}/{file_path}"
-                self._ftp.delete(remote_path)
+                self._delete_remote(remote_path)
                 result.files_deleted += 1
                 logger.debug(f"Deleted: {file_path}")
-            except ftplib.error_perm as e:
+            except (ftplib.error_perm, FileNotFoundError, IOError) as e:
                 # File might not exist, which is fine
                 logger.debug(f"Could not delete {file_path}: {e}")
         
@@ -398,44 +509,54 @@ class BlogDeployer:
     def _upload_file(self, local_path: Path, remote_path: str) -> None:
         """
         Upload a single file to the remote server.
-        
+
         Creates parent directories if needed.
         """
-        if not self._ftp:
-            raise RuntimeError("Not connected to FTP")
-        
+        if not self._ftp and not self._sftp:
+            raise RuntimeError("Not connected to FTP or SFTP")
+
         # Ensure parent directory exists
         parent_dir = os.path.dirname(remote_path)
         self._ensure_remote_dir(parent_dir)
-        
+
         # Upload file
-        with open(local_path, "rb") as f:
-            self._ftp.storbinary(f"STOR {remote_path}", f)
+        self._put_file(local_path, remote_path)
     
     def _ensure_remote_dir(self, dir_path: str) -> None:
         """Ensure a remote directory exists, creating if needed."""
-        if not self._ftp or not dir_path:
+        if (not self._ftp and not self._sftp) or not dir_path:
             return
-        
+
         # Split path and create each level
         parts = dir_path.strip("/").split("/")
         current = ""
-        
+
         for part in parts:
             if not part:
                 continue
             current = f"{current}/{part}"
-            try:
-                self._ftp.cwd(current)
-            except ftplib.error_perm:
-                # Directory doesn't exist, create it
+
+            if self._is_sftp:
                 try:
-                    self._ftp.mkd(current)
+                    self._sftp.stat(current)
+                except (FileNotFoundError, IOError):
+                    try:
+                        self._make_remote_dir(current)
+                    except (FileNotFoundError, IOError):
+                        pass  # Might already exist or permission issue
+            else:
+                try:
+                    self._ftp.cwd(current)
                 except ftplib.error_perm:
-                    pass  # Might already exist
-        
-        # Return to root
-        self._ftp.cwd("/")
+                    # Directory doesn't exist, create it
+                    try:
+                        self._make_remote_dir(current)
+                    except ftplib.error_perm:
+                        pass  # Might already exist
+
+        # Return to root for FTP
+        if not self._is_sftp and self._ftp:
+            self._ftp.cwd("/")
     
     def rollback(self, manifest_data: str) -> DeploymentResult:
         """
@@ -469,9 +590,9 @@ class BlogDeployer:
             for file_path in to_delete:
                 try:
                     remote_path = f"{self.remote_dir}/{file_path}"
-                    self._ftp.delete(remote_path)
+                    self._delete_remote(remote_path)
                     result.files_deleted += 1
-                except ftplib.error_perm:
+                except (ftplib.error_perm, FileNotFoundError, IOError):
                     pass
             
             logger.warning(

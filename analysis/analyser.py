@@ -31,6 +31,7 @@ from analysis.llm_client import (
     LLMConfig,
     LLMResponse,
 )
+from analysis.human_factors import HumanFactorsResult
 from config.settings import get_settings
 from database.models import Finding
 
@@ -68,35 +69,7 @@ class ExtractionResult:
     cost_usd: float = 0.0
 
 
-@dataclass
-class HumanFactorsResult:
-    """Result of SEIPS human factors analysis."""
-    
-    # SEIPS domains
-    individual_factors: list[dict[str, Any]] = field(default_factory=list)
-    team_factors: list[dict[str, Any]] = field(default_factory=list)
-    task_factors: list[dict[str, Any]] = field(default_factory=list)
-    technology_factors: list[dict[str, Any]] = field(default_factory=list)
-    environment_factors: list[dict[str, Any]] = field(default_factory=list)
-    organisational_factors: list[dict[str, Any]] = field(default_factory=list)
-    
-    # Additional analysis
-    latent_hazards: list[dict[str, Any]] = field(default_factory=list)
-    improvement_opportunities: list[dict[str, Any]] = field(default_factory=list)
-    
-    tokens_used: int = 0
-    cost_usd: float = 0.0
-    
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for storage."""
-        return {
-            "individual_factors": self.individual_factors,
-            "team_factors": self.team_factors,
-            "task_factors": self.task_factors,
-            "technology_factors": self.technology_factors,
-            "environment_factors": self.environment_factors,
-            "organisational_factors": self.organisational_factors,
-        }
+# HumanFactorsResult is now imported from human_factors module
 
 
 @dataclass

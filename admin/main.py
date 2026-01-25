@@ -22,7 +22,7 @@ from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.security import HTTPBasic, HTTPBasicCredentials, OAuth2PasswordBearer
 
 from config.settings import get_settings
 from config.logging import setup_logging, get_logger
@@ -126,6 +126,7 @@ def truncate_words(value: str, num_words: int = 30) -> str:
 # =============================================================================
 
 security = HTTPBasic()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 
 def get_current_user(
@@ -192,6 +193,98 @@ def get_current_user(
 
     logger.debug(f"User authenticated: {credentials.username}")
     return credentials.username
+
+
+def get_current_user_jwt(
+    token: Optional[str] = Depends(oauth2_scheme),
+) -> str:
+    """
+    Validate JWT token and return the current user.
+
+    Args:
+        token: JWT token from Authorization header
+
+    Returns:
+        Username if token is valid
+
+    Raises:
+        HTTPException: If token is invalid or missing
+    """
+    from admin.auth import verify_token
+    from jose import JWTError
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    try:
+        token_data = verify_token(token)
+        if token_data.username is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        logger.debug(f"JWT authenticated user: {token_data.username}")
+        return token_data.username
+    except JWTError as e:
+        logger.warning(f"JWT verification failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+def get_optional_user(
+    token: Optional[str] = Depends(oauth2_scheme),
+    credentials: Optional[HTTPBasicCredentials] = Depends(security),
+) -> str:
+    """
+    Get current user from either JWT token or HTTP Basic auth.
+    Tries JWT first, falls back to Basic auth.
+
+    This provides backward compatibility while migrating to JWT.
+
+    Args:
+        token: JWT token (optional)
+        credentials: HTTP Basic credentials (optional)
+
+    Returns:
+        Username if authentication successful
+
+    Raises:
+        HTTPException: If neither authentication method succeeds
+    """
+    from admin.auth import verify_token
+    from jose import JWTError
+
+    # Try JWT authentication first
+    if token:
+        try:
+            token_data = verify_token(token)
+            if token_data.username:
+                logger.debug(f"User authenticated via JWT: {token_data.username}")
+                return token_data.username
+        except JWTError:
+            pass  # Fall through to Basic auth
+
+    # Fall back to HTTP Basic authentication
+    if credentials:
+        try:
+            return get_current_user(credentials)
+        except HTTPException:
+            pass  # Re-raise below
+
+    # No valid authentication provided
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Not authenticated",
+        headers={"WWW-Authenticate": "Bearer, Basic"},
+    )
 
 
 # =============================================================================

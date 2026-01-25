@@ -189,13 +189,23 @@ class Settings(BaseSettings):
     )
     secret_key: str = Field(
         default="development-secret-key-change-in-production",
-        description="Secret key for session signing",
+        description="Secret key for session signing and JWT token encryption",
     )
     session_expiry_hours: int = Field(
         default=24,
         description="Session expiry time in hours",
     )
-    
+
+    # JWT Configuration
+    jwt_algorithm: str = Field(
+        default="HS256",
+        description="JWT signing algorithm (HS256, HS512, RS256, etc.)",
+    )
+    jwt_expiration_minutes: int = Field(
+        default=60,
+        description="JWT token expiration time in minutes",
+    )
+
     # -------------------------------------------------------------------------
     # Scraping
     # -------------------------------------------------------------------------
@@ -237,7 +247,7 @@ class Settings(BaseSettings):
     )
     ftp_port: int = Field(
         default=21,
-        description="FTP port (21 for FTP, 22 for SFTP)",
+        description="FTP/SFTP port (21 for FTP, 22 for SFTP - protocol auto-detected from port)",
     )
     ftp_directory: str = Field(
         default="/public_html",
@@ -348,14 +358,38 @@ class Settings(BaseSettings):
         # For backward compatibility, allow plain text but it will be handled in auth
         import warnings
         warnings.warn(
-            f"admin_password_hash does not appear to be a bcrypt hash. "
-            f"Plain text passwords are deprecated. Generate a hash with: "
-            f"python -c \"import bcrypt; print(bcrypt.hashpw(b'{v}', bcrypt.gensalt()).decode())\"",
+            "admin_password_hash does not appear to be a bcrypt hash. "
+            "Plain text passwords are deprecated. Generate a hash with: "
+            "python scripts/hash_password.py",
             DeprecationWarning,
             stacklevel=2
         )
         return v
-    
+
+    @field_validator("secret_key")
+    @classmethod
+    def validate_secret_key(cls, v: str, info) -> str:
+        """
+        Warn if using the default secret key.
+
+        In production, a secure random key should be set via SECRET_KEY env var.
+        """
+        if v == "development-secret-key-change-in-production":
+            import warnings
+            # Check environment from already-validated values or env var
+            env = os.environ.get("ENVIRONMENT", "development").lower()
+            if env == "production":
+                raise ValueError(
+                    "SECRET_KEY must be set explicitly in production. "
+                    "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+                )
+            warnings.warn(
+                "Using default secret key. Set SECRET_KEY environment variable for production.",
+                UserWarning,
+                stacklevel=2
+            )
+        return v
+
     # -------------------------------------------------------------------------
     # Computed Properties
     # -------------------------------------------------------------------------

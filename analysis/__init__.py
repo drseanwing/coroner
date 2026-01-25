@@ -32,9 +32,16 @@ from analysis.analyser import (
     AnalysisPipelineResult,
     ClassificationResult,
     ExtractionResult,
-    HumanFactorsResult,
     BlogPostResult,
     PromptTemplateLoader,
+)
+from analysis.human_factors import (
+    HumanFactorsResult,
+    SEIPSDomain,
+    Severity,
+    HumanFactor,
+    LatentHazard,
+    Recommendation,
 )
 from analysis.processor import (
     AnalysisProcessor,
@@ -53,9 +60,15 @@ __all__ = [
     "AnalysisPipelineResult",
     "ClassificationResult",
     "ExtractionResult",
-    "HumanFactorsResult",
     "BlogPostResult",
     "PromptTemplateLoader",
+    # Human Factors
+    "HumanFactorsResult",
+    "SEIPSDomain",
+    "Severity",
+    "HumanFactor",
+    "LatentHazard",
+    "Recommendation",
     # Processor
     "AnalysisProcessor",
     "ProcessingStats",

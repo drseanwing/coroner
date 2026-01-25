@@ -9,10 +9,12 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
 
 from config.logging import get_logger
+from config.settings import get_settings
 from database.connection import get_session
 from database.models import PostStatus, FindingStatus
 from database.repository import (
@@ -21,7 +23,16 @@ from database.repository import (
     SourceRepository,
     AnalysisRepository,
 )
-from admin.main import get_current_user
+from admin.main import get_current_user, get_current_user_jwt
+from admin.auth import (
+    Token,
+    TokenData,
+    User,
+    create_access_token,
+    verify_token,
+    verify_password,
+    get_token_expiration,
+)
 
 
 logger = get_logger(__name__)
@@ -133,6 +144,167 @@ class PaginatedResponse(BaseModel):
     page: int
     per_page: int
     total_pages: int
+
+
+class UserInfo(BaseModel):
+    """Current user information."""
+    username: str
+    role: str
+
+
+# =============================================================================
+# Authentication Endpoints
+# =============================================================================
+
+@router.post("/auth/login", response_model=Token)
+async def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+):
+    """
+    OAuth2 login endpoint - exchange username/password for JWT token.
+
+    Args:
+        form_data: OAuth2 password grant form data
+
+    Returns:
+        Token with access_token, token_type, and expiration
+
+    Raises:
+        HTTPException: If credentials are invalid
+    """
+    settings = get_settings()
+
+    # Validate username (constant-time comparison)
+    import secrets
+    correct_username = secrets.compare_digest(
+        form_data.username.encode("utf8"),
+        settings.admin_username.encode("utf8"),
+    )
+
+    # Validate password
+    correct_password = verify_password(
+        form_data.password,
+        settings.admin_password_hash,
+    )
+
+    if not (correct_username and correct_password):
+        logger.warning(
+            "Failed JWT login attempt",
+            extra={"username": form_data.username},
+        )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Create access token
+    access_token = create_access_token(
+        data={
+            "sub": form_data.username,
+            "role": "admin",
+        }
+    )
+
+    expires_at = get_token_expiration()
+
+    logger.info(
+        "JWT login successful",
+        extra={
+            "username": form_data.username,
+            "expires_at": expires_at.isoformat(),
+        },
+    )
+
+    return Token(
+        access_token=access_token,
+        token_type="bearer",
+        expires_at=expires_at,
+    )
+
+
+@router.post("/auth/refresh", response_model=Token)
+async def refresh_token(
+    user: str = Depends(get_current_user_jwt),
+):
+    """
+    Refresh an existing JWT token.
+
+    Args:
+        user: Current authenticated user (from JWT)
+
+    Returns:
+        New token with extended expiration
+    """
+    # Create new token
+    access_token = create_access_token(
+        data={
+            "sub": user,
+            "role": "admin",
+        }
+    )
+
+    expires_at = get_token_expiration()
+
+    logger.info(
+        "JWT token refreshed",
+        extra={
+            "username": user,
+            "expires_at": expires_at.isoformat(),
+        },
+    )
+
+    return Token(
+        access_token=access_token,
+        token_type="bearer",
+        expires_at=expires_at,
+    )
+
+
+@router.post("/auth/logout")
+async def logout(
+    user: str = Depends(get_current_user_jwt),
+):
+    """
+    Logout endpoint (for JWT, this is mostly informational).
+
+    Since JWT is stateless, actual token invalidation happens client-side
+    by deleting the token. This endpoint logs the logout event.
+
+    Args:
+        user: Current authenticated user
+
+    Returns:
+        Success message
+    """
+    logger.info(
+        "User logged out",
+        extra={"username": user},
+    )
+
+    return {
+        "status": "success",
+        "message": "Logged out successfully",
+    }
+
+
+@router.get("/auth/me", response_model=UserInfo)
+async def get_current_user_info(
+    user: str = Depends(get_current_user_jwt),
+):
+    """
+    Get current user information.
+
+    Args:
+        user: Current authenticated user
+
+    Returns:
+        User information including username and role
+    """
+    return UserInfo(
+        username=user,
+        role="admin",
+    )
 
 
 # =============================================================================
