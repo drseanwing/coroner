@@ -43,6 +43,11 @@ from scrapers.scheduler import ScraperScheduler
 # Import concrete scrapers to register them with the factory
 # This ensures they're registered when the package is imported
 from scrapers.uk_pfd import UKPFDScraper
+from scrapers.uk_hssib import HSSIBScraper
+from scrapers.au_nsw_coroner import NSWCoronerScraper
+from scrapers.au_qld_coroner import QLDCoronerScraper
+from scrapers.nz_coroner import NZCoronerScraper
+from scrapers.nz_hdc import NZHDCScraper
 
 __all__ = [
     # Base classes
@@ -54,4 +59,9 @@ __all__ = [
     "ScraperScheduler",
     # Concrete scrapers
     "UKPFDScraper",
+    "HSSIBScraper",
+    "NSWCoronerScraper",
+    "QLDCoronerScraper",
+    "NZCoronerScraper",
+    "NZHDCScraper",
 ]

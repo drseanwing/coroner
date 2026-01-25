@@ -4,6 +4,7 @@ Patient Safety Monitor - Admin Dashboard Routes
 Page routes for the admin dashboard using Jinja2 templates and HTMX.
 """
 
+import asyncio
 import logging
 from datetime import datetime
 from typing import Optional
@@ -493,26 +494,85 @@ async def trigger_scrape(
     """
     Manually trigger a scrape for a source (HTMX endpoint).
     """
-    # Note: This would trigger the scheduler asynchronously
-    # For now, return a status message
-    
-    logger.info(
-        "Manual scrape triggered",
-        extra={
-            "source_id": str(source_id),
-            "triggered_by": user,
-        },
-    )
-    
     templates = request.app.state.templates
-    return templates.TemplateResponse(
-        "partials/trigger_status.html",
-        {
-            "request": request,
-            "status": "triggered",
-            "message": "Scrape job queued",
-        },
-    )
+
+    # Get the source to retrieve the source code
+    with get_session() as session:
+        source_repo = SourceRepository(session)
+        source = source_repo.get_by_id(source_id)
+
+        if not source:
+            logger.error(f"Source not found: {source_id}")
+            return templates.TemplateResponse(
+                "partials/trigger_status.html",
+                {
+                    "request": request,
+                    "status": "error",
+                    "message": "Source not found",
+                },
+            )
+
+        if not source.is_active:
+            logger.warning(
+                "Attempted to trigger inactive source",
+                extra={
+                    "source_id": str(source_id),
+                    "source_code": source.code,
+                    "triggered_by": user,
+                },
+            )
+            return templates.TemplateResponse(
+                "partials/trigger_status.html",
+                {
+                    "request": request,
+                    "status": "error",
+                    "message": "Source is inactive",
+                },
+            )
+
+        source_code = source.code
+
+    # Get scheduler from app state
+    scheduler = request.app.state.scheduler
+
+    # Trigger the scraper in the background
+    try:
+        asyncio.create_task(scheduler.trigger_scraper(source_code))
+
+        logger.info(
+            "Manual scrape triggered",
+            extra={
+                "source_id": str(source_id),
+                "source_code": source_code,
+                "triggered_by": user,
+            },
+        )
+
+        return templates.TemplateResponse(
+            "partials/trigger_status.html",
+            {
+                "request": request,
+                "status": "triggered",
+                "message": f"Scrape started for {source.name}",
+            },
+        )
+    except Exception as e:
+        logger.exception(
+            "Failed to trigger scraper",
+            extra={
+                "source_id": str(source_id),
+                "source_code": source_code,
+                "error": str(e),
+            },
+        )
+        return templates.TemplateResponse(
+            "partials/trigger_status.html",
+            {
+                "request": request,
+                "status": "error",
+                "message": f"Failed to start scraper: {str(e)}",
+            },
+        )
 
 
 # =============================================================================

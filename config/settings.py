@@ -20,6 +20,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
+import bcrypt
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -320,6 +321,40 @@ class Settings(BaseSettings):
         if v_lower not in valid_providers:
             raise ValueError(f"Invalid LLM provider: {v}. Must be one of {valid_providers}")
         return v_lower
+
+    @field_validator("admin_password_hash")
+    @classmethod
+    def validate_password_hash(cls, v: str) -> str:
+        """
+        Ensure admin_password_hash is either a valid bcrypt hash or empty.
+
+        For backward compatibility, plain text passwords are allowed but warned.
+        Bcrypt hashes start with $2a$, $2b$, or $2y$.
+        """
+        if not v:
+            return v
+
+        # Check if it looks like a bcrypt hash
+        if v.startswith(("$2a$", "$2b$", "$2y$")):
+            # Validate bcrypt hash format: $2b$rounds$salt(22 chars)hash(31 chars)
+            # Total length should be ~60 characters
+            if len(v) < 59:
+                raise ValueError(
+                    "Invalid bcrypt hash format. Generate with: "
+                    "python -c \"import bcrypt; print(bcrypt.hashpw(b'password', bcrypt.gensalt()).decode())\""
+                )
+            return v
+
+        # For backward compatibility, allow plain text but it will be handled in auth
+        import warnings
+        warnings.warn(
+            f"admin_password_hash does not appear to be a bcrypt hash. "
+            f"Plain text passwords are deprecated. Generate a hash with: "
+            f"python -c \"import bcrypt; print(bcrypt.hashpw(b'{v}', bcrypt.gensalt()).decode())\"",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        return v
     
     # -------------------------------------------------------------------------
     # Computed Properties
@@ -367,6 +402,24 @@ class Settings(BaseSettings):
         if not prompts_path.is_absolute():
             prompts_path = PROJECT_ROOT / prompts_path
         return prompts_path / filename
+
+    @staticmethod
+    def hash_password(password: str) -> str:
+        """
+        Hash a password using bcrypt.
+
+        Args:
+            password: Plain text password to hash
+
+        Returns:
+            Bcrypt hash string
+
+        Example:
+            >>> hashed = Settings.hash_password("mypassword")
+            >>> hashed.startswith("$2b$")
+            True
+        """
+        return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 # =============================================================================

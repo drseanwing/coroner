@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}{{ source.name }} | {{ site.title }}{% endblock %}
+{% block description %}{{ posts | length }} patient safety {{ 'finding' if posts | length == 1 else 'findings' }} from {{ source.name }} ({{ source.country }}{% if source.region %} - {{ source.region }}{% endif %}).{% endblock %}
+{% block canonical %}{{ site.base_url }}/sources/{{ source.code }}/{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <header class="mb-8">
+        <nav class="text-sm text-gray-500 mb-4">
+            <a href="/" class="hover:text-blue-600">Home</a>
+            <span class="mx-2">/</span>
+            <span>Sources</span>
+            <span class="mx-2">/</span>
+            <span class="text-gray-900">{{ source.name }}</span>
+        </nav>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ source.name }}</h1>
+            <div class="flex items-center gap-4 text-gray-600 mb-3">
+                <span class="inline-flex items-center gap-1">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {{ source.country }}{% if source.region %} ({{ source.region }}){% endif %}
+                </span>
+            </div>
+            <p class="text-lg text-gray-700">
+                {{ posts | length }} {{ 'finding' if posts | length == 1 else 'findings' }} from this source
+            </p>
+        </div>
+    </header>
+
+    <!-- Posts -->
+    {% if posts %}
+    <div class="space-y-6">
+        {% for post in posts %}
+        <article class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+            <div class="p-6">
+                <div class="flex items-center text-sm text-gray-500 mb-2">
+                    <time datetime="{{ post.published_at.isoformat() if post.published_at else '' }}">
+                        {{ post.published_at | datetime if post.published_at else 'Unpublished' }}
+                    </time>
+                </div>
+
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                    <a href="/posts/{{ post.slug }}/" class="hover:text-blue-600 transition-colors">
+                        {{ post.title }}
+                    </a>
+                </h2>
+
+                {% if post.excerpt %}
+                <p class="text-gray-600 mb-4 line-clamp-3">
+                    {{ post.excerpt }}
+                </p>
+                {% elif post.content_markdown %}
+                <p class="text-gray-600 mb-4 line-clamp-3">
+                    {{ post.content_markdown | truncate_words(30) }}
+                </p>
+                {% endif %}
+
+                {% if post.tags %}
+                <div class="flex flex-wrap gap-2">
+                    {% for tag in post.tags %}
+                    <a href="/tags/{{ tag | lower | replace(' ', '-') }}/"
+                       class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+                        {{ tag }}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
+        <svg class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <p class="text-gray-600">No findings from this source yet.</p>
+    </div>
+    {% endif %}
+
+    <!-- Back to all posts -->
+    <nav class="mt-8 pt-8 border-t border-gray-200">
+        <a href="/posts/" class="text-blue-600 hover:text-blue-800 inline-flex items-center">
+            <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            All Posts
+        </a>
+    </nav>
+</div>
+{% endblock %}

@@ -39,12 +39,13 @@ def setup_test_environment():
     os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
     os.environ.setdefault("ANTHROPIC_API_KEY", "sk-ant-test-key-not-real")
     os.environ.setdefault("ADMIN_USERNAME", "admin")
-    os.environ.setdefault("ADMIN_PASSWORD", "admin")
+    # Use bcrypt hash for "admin" password for testing
+    os.environ.setdefault("ADMIN_PASSWORD_HASH", "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.mqH0F3B.aGmD2q")
     os.environ.setdefault("SECRET_KEY", "test-secret-key")
     os.environ.setdefault("LOG_LEVEL", "WARNING")
-    
+
     yield
-    
+
     # Cleanup if needed
 
 
@@ -60,7 +61,8 @@ def mock_settings():
     settings.anthropic_api_key = "sk-ant-test-key"
     settings.openai_api_key = None
     settings.admin_username = "admin"
-    settings.admin_password = "admin"
+    # Use bcrypt hash for "admin" password for testing
+    settings.admin_password_hash = "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.mqH0F3B.aGmD2q"
     settings.secret_key = "test-secret"
     settings.log_level = "WARNING"
     settings.environment = "test"
@@ -68,7 +70,7 @@ def mock_settings():
     settings.debug = True
     settings.blog_base_url = "https://test.example.com"
     settings.llm_primary_model = "claude-sonnet-4-20250514"
-    
+
     with patch("config.settings.get_settings", return_value=settings):
         yield settings
 

@@ -17,6 +17,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+import bcrypt
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -26,6 +27,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from config.settings import get_settings
 from config.logging import setup_logging, get_logger
 from database.connection import init_database, get_session
+from scrapers.scheduler import ScraperScheduler
 
 
 logger = get_logger(__name__)
@@ -49,15 +51,20 @@ def create_app() -> FastAPI:
         logger.info("=" * 60)
         logger.info("Patient Safety Monitor - Admin Dashboard Starting")
         logger.info("=" * 60)
-        
+
         # Initialize database connection
         if not init_database():
             logger.error("Failed to initialize database connection")
             raise RuntimeError("Database initialization failed")
-        
+
+        # Initialize scraper scheduler (for manual triggers only, not auto-scheduling)
+        scheduler = ScraperScheduler()
+        app.state.scheduler = scheduler
+        logger.info("ScraperScheduler initialized for manual triggers")
+
         logger.info("Admin dashboard ready")
         yield
-        
+
         logger.info("Admin dashboard shutting down")
     
     app = FastAPI(
@@ -125,29 +132,53 @@ def get_current_user(
     credentials: HTTPBasicCredentials = Depends(security),
 ) -> str:
     """
-    Validate HTTP Basic Auth credentials.
-    
+    Validate HTTP Basic Auth credentials using bcrypt.
+
+    Supports both bcrypt hashed passwords (recommended) and plain text passwords
+    (for backward compatibility during migration).
+
     Args:
         credentials: HTTP Basic Auth credentials
-        
+
     Returns:
         Username if valid
-        
+
     Raises:
         HTTPException: If credentials are invalid
     """
     settings = get_settings()
-    
-    # Constant-time comparison to prevent timing attacks
+
+    # Constant-time comparison for username to prevent timing attacks
     correct_username = secrets.compare_digest(
         credentials.username.encode("utf8"),
         settings.admin_username.encode("utf8"),
     )
-    correct_password = secrets.compare_digest(
-        credentials.password.encode("utf8"),
-        settings.admin_password.encode("utf8"),
-    )
-    
+
+    # Password verification with bcrypt support
+    password_hash = settings.admin_password_hash
+    correct_password = False
+
+    if password_hash.startswith(("$2a$", "$2b$", "$2y$")):
+        # Bcrypt hash - use bcrypt.checkpw()
+        try:
+            correct_password = bcrypt.checkpw(
+                credentials.password.encode("utf8"),
+                password_hash.encode("utf8"),
+            )
+        except (ValueError, AttributeError) as e:
+            logger.error(f"Bcrypt verification error: {e}")
+            correct_password = False
+    else:
+        # Backward compatibility: plain text password (deprecated)
+        logger.warning(
+            "Using plain text password comparison (deprecated). "
+            "Please migrate to bcrypt hashed passwords."
+        )
+        correct_password = secrets.compare_digest(
+            credentials.password.encode("utf8"),
+            password_hash.encode("utf8"),
+        )
+
     if not (correct_username and correct_password):
         logger.warning(
             "Failed login attempt",
@@ -158,7 +189,7 @@ def get_current_user(
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Basic"},
         )
-    
+
     logger.debug(f"User authenticated: {credentials.username}")
     return credentials.username
 

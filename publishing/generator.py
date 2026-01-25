@@ -32,6 +32,7 @@ from config.logging import get_logger
 from database.connection import get_session
 from database.models import Post, PostStatus
 from database.repository import PostRepository
+from publishing.search_index import SearchIndexBuilder
 
 
 logger = get_logger(__name__)
@@ -169,7 +170,21 @@ class BlogGenerator:
                     except Exception as e:
                         logger.error(f"Failed to generate tag page {tag}: {e}")
                         result.errors.append(f"Tag {tag}: {e}")
-                
+
+                # Generate source pages
+                sources = self._collect_sources(posts)
+                for source_code, source_data in sources.items():
+                    try:
+                        self._generate_source_page(
+                            source_code,
+                            source_data["info"],
+                            source_data["posts"],
+                        )
+                        result.source_pages_generated += 1
+                    except Exception as e:
+                        logger.error(f"Failed to generate source page {source_code}: {e}")
+                        result.errors.append(f"Source {source_code}: {e}")
+
                 # Generate static pages
                 self._generate_about_page()
                 result.index_pages_generated += 1
@@ -179,9 +194,15 @@ class BlogGenerator:
                 result.rss_generated = True
                 
                 # Generate sitemap
-                self._generate_sitemap(posts, tags.keys())
+                self._generate_sitemap(posts, tags.keys(), sources.keys())
                 result.sitemap_generated = True
-                
+
+                # Generate search index
+                search_builder = SearchIndexBuilder()
+                search_builder.build_index(posts)
+                search_index_path = self.output_dir / "search-index.json"
+                search_builder.generate_json(search_index_path)
+
                 # Copy static assets
                 self._copy_assets()
             
@@ -197,6 +218,7 @@ class BlogGenerator:
                 "posts": result.posts_generated,
                 "index_pages": result.index_pages_generated,
                 "tag_pages": result.tag_pages_generated,
+                "source_pages": result.source_pages_generated,
                 "duration_seconds": result.duration_seconds,
                 "errors": len(result.errors),
             },
@@ -338,30 +360,62 @@ class BlogGenerator:
     def _generate_tag_page(self, tag: str, posts: list[Post]) -> None:
         """Generate a tag listing page."""
         template = self.jinja_env.get_template("tag.html")
-        
+
         # Sort posts by date
         sorted_posts = sorted(
             posts,
             key=lambda p: p.published_at or p.created_at,
             reverse=True,
         )
-        
+
         html = template.render(
             site=self.site_config,
             tag=tag,
             posts=sorted_posts,
             generated_at=datetime.utcnow(),
         )
-        
+
         # Create tag directory
         tag_slug = self._slugify(tag)
         tag_dir = self.output_dir / "tags" / tag_slug
         tag_dir.mkdir(parents=True, exist_ok=True)
-        
+
         output_path = tag_dir / "index.html"
         output_path.write_text(html, encoding="utf-8")
-        
+
         logger.debug(f"Generated tag page: {tag}")
+
+    def _generate_source_page(
+        self,
+        source_code: str,
+        source_info: dict,
+        posts: list[Post]
+    ) -> None:
+        """Generate a source listing page."""
+        template = self.jinja_env.get_template("source.html")
+
+        # Sort posts by date
+        sorted_posts = sorted(
+            posts,
+            key=lambda p: p.published_at or p.created_at,
+            reverse=True,
+        )
+
+        html = template.render(
+            site=self.site_config,
+            source=source_info,
+            posts=sorted_posts,
+            generated_at=datetime.utcnow(),
+        )
+
+        # Create source directory
+        source_dir = self.output_dir / "sources" / source_code
+        source_dir.mkdir(parents=True, exist_ok=True)
+
+        output_path = source_dir / "index.html"
+        output_path.write_text(html, encoding="utf-8")
+
+        logger.debug(f"Generated source page: {source_code}")
     
     def _generate_about_page(self) -> None:
         """Generate the about page."""
@@ -399,39 +453,49 @@ class BlogGenerator:
         
         logger.debug("Generated RSS feed")
     
-    def _generate_sitemap(self, posts: list[Post], tags: list[str]) -> None:
+    def _generate_sitemap(
+        self,
+        posts: list[Post],
+        tags: list[str],
+        sources: list[str]
+    ) -> None:
         """Generate XML sitemap."""
         urlset = ET.Element("urlset")
         urlset.set("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9")
-        
+
         base_url = self.site_config["base_url"].rstrip("/")
-        
+
         # Add homepage
         self._add_sitemap_url(urlset, f"{base_url}/", "daily", "1.0")
-        
+
         # Add about page
         self._add_sitemap_url(urlset, f"{base_url}/about/", "monthly", "0.5")
-        
+
         # Add posts archive
         self._add_sitemap_url(urlset, f"{base_url}/posts/", "daily", "0.8")
-        
+
         # Add individual posts
         for post in posts:
             url = f"{base_url}/posts/{post.slug}/"
             lastmod = (post.published_at or post.created_at).strftime("%Y-%m-%d")
             self._add_sitemap_url(urlset, url, "monthly", "0.7", lastmod)
-        
+
         # Add tag pages
         for tag in tags:
             tag_slug = self._slugify(tag)
             url = f"{base_url}/tags/{tag_slug}/"
             self._add_sitemap_url(urlset, url, "weekly", "0.6")
-        
+
+        # Add source pages
+        for source_code in sources:
+            url = f"{base_url}/sources/{source_code}/"
+            self._add_sitemap_url(urlset, url, "weekly", "0.6")
+
         # Write sitemap
         tree = ET.ElementTree(urlset)
         output_path = self.output_dir / "sitemap.xml"
         tree.write(output_path, encoding="utf-8", xml_declaration=True)
-        
+
         logger.debug("Generated sitemap")
     
     def _add_sitemap_url(
@@ -471,15 +535,56 @@ class BlogGenerator:
     def _collect_tags(self, posts: list[Post]) -> dict[str, list[Post]]:
         """Collect all tags and their associated posts."""
         tags: dict[str, list[Post]] = {}
-        
+
         for post in posts:
             if post.tags:
                 for tag in post.tags:
                     if tag not in tags:
                         tags[tag] = []
                     tags[tag].append(post)
-        
+
         return tags
+
+    def _collect_sources(self, posts: list[Post]) -> dict[str, dict]:
+        """
+        Collect all sources and their associated posts.
+
+        Returns:
+            Dictionary mapping source_code to {info: dict, posts: list[Post]}
+        """
+        sources: dict[str, dict] = {}
+
+        for post in posts:
+            # Get source from post.analysis.finding.source
+            if not hasattr(post, 'analysis') or not post.analysis:
+                continue
+
+            analysis = post.analysis
+            if not hasattr(analysis, 'finding') or not analysis.finding:
+                continue
+
+            finding = analysis.finding
+            if not hasattr(finding, 'source') or not finding.source:
+                continue
+
+            source = finding.source
+            source_code = source.code
+
+            # Initialize source entry if not exists
+            if source_code not in sources:
+                sources[source_code] = {
+                    "info": {
+                        "code": source.code,
+                        "name": source.name,
+                        "country": source.country,
+                        "region": source.region if hasattr(source, 'region') else None,
+                    },
+                    "posts": []
+                }
+
+            sources[source_code]["posts"].append(post)
+
+        return sources
     
     def _slugify(self, text: str) -> str:
         """Convert text to URL-safe slug."""
@@ -740,6 +845,7 @@ def main() -> int:
     print(f"  Posts generated: {result.posts_generated}")
     print(f"  Index pages: {result.index_pages_generated}")
     print(f"  Tag pages: {result.tag_pages_generated}")
+    print(f"  Source pages: {result.source_pages_generated}")
     print(f"  RSS feed: {'Yes' if result.rss_generated else 'No'}")
     print(f"  Sitemap: {'Yes' if result.sitemap_generated else 'No'}")
     print(f"  Duration: {result.duration_seconds:.1f}s")
