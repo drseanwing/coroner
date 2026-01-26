@@ -1,0 +1,171 @@
+# Patient Safety Monitor - Unified Docker Compose Configuration
+# Uses a single application image with all services bundled
+# =============================================================================
+# Version: 1.0.0
+
+services:
+  # ===========================================================================
+  # Unified Application Container
+  # Runs both web app and scheduler via supervisord
+  # ===========================================================================
+  psm:
+    build:
+      context: .
+      dockerfile: Dockerfile.unified
+      target: production
+    container_name: patient-safety-monitor
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      # Database
+      - DATABASE_URL=postgresql://psm_user:psm_password@db:5432/patient_safety_monitor
+      # LLM API Keys
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      # Admin Authentication
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH}
+      - SECRET_KEY=${SECRET_KEY}
+      # Application Settings
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DEBUG=${DEBUG:-false}
+      # Runtime Configuration
+      - RUN_MODE=all
+      - WAIT_FOR_DB=true
+      - RUN_MIGRATIONS=true
+      - SEED_SOURCES=true
+      # FTP Deployment (Optional)
+      - FTP_HOST=${FTP_HOST:-}
+      - FTP_USERNAME=${FTP_USERNAME:-}
+      - FTP_PASSWORD=${FTP_PASSWORD:-}
+      - FTP_REMOTE_PATH=${FTP_REMOTE_PATH:-/public_html/}
+    volumes:
+      # Persistent logs
+      - psm_logs:/app/logs
+      # Downloaded PDFs and temp data
+      - psm_data:/app/data
+      # Configuration (read-only)
+      - ./config:/app/config:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+    networks:
+      - psm-network
+
+  # ===========================================================================
+  # PostgreSQL Database
+  # ===========================================================================
+  db:
+    image: postgres:15-alpine
+    container_name: psm-database
+    environment:
+      POSTGRES_USER: psm_user
+      POSTGRES_PASSWORD: psm_password
+      POSTGRES_DB: patient_safety_monitor
+      # Performance tuning
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Optional: Custom PostgreSQL configuration
+      # - ./docker/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    ports:
+      # Expose only in development - remove or comment out in production
+      - "${DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U psm_user -d patient_safety_monitor"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - psm-network
+
+# =============================================================================
+# Alternative Configurations (uncomment as needed)
+# =============================================================================
+
+  # ---------------------------------------------------------------------------
+  # App-only mode (for horizontal scaling or separate deployment)
+  # ---------------------------------------------------------------------------
+  # psm-app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.unified
+  #   container_name: psm-app
+  #   environment:
+  #     - RUN_MODE=app
+  #     - DATABASE_URL=postgresql://psm_user:psm_password@db:5432/patient_safety_monitor
+  #     # ... other env vars
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - psm-network
+
+  # ---------------------------------------------------------------------------
+  # Scheduler-only mode (run separately from web app)
+  # ---------------------------------------------------------------------------
+  # psm-scheduler:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.unified
+  #   container_name: psm-scheduler
+  #   environment:
+  #     - RUN_MODE=scheduler
+  #     - DATABASE_URL=postgresql://psm_user:psm_password@db:5432/patient_safety_monitor
+  #     # ... other env vars
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - psm-network
+
+# =============================================================================
+# Volumes - Named volumes for data persistence
+# =============================================================================
+volumes:
+  postgres_data:
+    driver: local
+    name: psm_postgres_data
+  psm_logs:
+    driver: local
+    name: psm_logs
+  psm_data:
+    driver: local
+    name: psm_data
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  psm-network:
+    driver: bridge
+    name: psm-network
+
+# =============================================================================
+# Usage:
+# =============================================================================
+# Start all services:
+#   docker-compose -f docker-compose.unified.yml up -d
+#
+# View logs:
+#   docker-compose -f docker-compose.unified.yml logs -f
+#
+# Stop services:
+#   docker-compose -f docker-compose.unified.yml down
+#
+# Rebuild and restart:
+#   docker-compose -f docker-compose.unified.yml up -d --build
+#
+# Run migrations only:
+#   docker-compose -f docker-compose.unified.yml run --rm psm sh -c "RUN_MODE=migrate /usr/local/bin/docker-entrypoint.sh"
+# =============================================================================
