@@ -88,7 +88,7 @@ class Settings(BaseSettings):
     # Database
     # -------------------------------------------------------------------------
     database_url: str = Field(
-        default="postgresql://psm_user:psm_password@localhost:5432/patient_safety_monitor",
+        default="postgresql://psm_user:psm_password@localhost:7411/patient_safety_monitor",
         description="PostgreSQL connection string",
     )
     database_pool_size: int = Field(

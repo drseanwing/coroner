@@ -55,9 +55,9 @@ docker-compose -f docker-compose.unified.yml logs -f
 
 ### 4. Access Application
 
-- Dashboard: http://localhost:8000/dashboard
-- Health check: http://localhost:8000/health
-- API docs: http://localhost:8000/docs
+- Dashboard: http://localhost:7410/dashboard
+- Health check: http://localhost:7410/health
+- API docs: http://localhost:7410/docs
 
 ---
 
@@ -123,22 +123,22 @@ The unified image supports multiple run modes via the `RUN_MODE` environment var
 # Run all services
 docker run -d \
   -e RUN_MODE=all \
-  -e DATABASE_URL=postgresql://user:pass@host:5432/db \
+  -e DATABASE_URL=postgresql://user:pass@host:7411/db \
   -e ANTHROPIC_API_KEY=sk-ant-xxx \
-  -p 8000:8000 \
+  -p 7410:7410 \
   psm:latest
 
 # Run web app only
 docker run -d \
   -e RUN_MODE=app \
-  -e DATABASE_URL=postgresql://user:pass@host:5432/db \
-  -p 8000:8000 \
+  -e DATABASE_URL=postgresql://user:pass@host:7411/db \
+  -p 7410:7410 \
   psm:latest
 
 # Run migrations only (one-time)
 docker run --rm \
   -e RUN_MODE=migrate \
-  -e DATABASE_URL=postgresql://user:pass@host:5432/db \
+  -e DATABASE_URL=postgresql://user:pass@host:7411/db \
   psm:latest
 ```
 
@@ -183,10 +183,10 @@ docker-compose logs -f scheduler
 
 | Service | Purpose | Port |
 |---------|---------|------|
-| `app` | FastAPI web application | 8000 |
+| `app` | FastAPI web application | 7410 |
 | `scheduler` | APScheduler background jobs | - |
 | `migrate` | Database migrations (one-time) | - |
-| `db` | PostgreSQL database | 5432 |
+| `db` | PostgreSQL database | 7411 |
 
 ---
 
@@ -196,7 +196,7 @@ docker-compose logs -f scheduler
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host:5432/db` |
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host:7411/db` |
 | `ANTHROPIC_API_KEY` | Claude API key | `sk-ant-api03-xxx` |
 | `SECRET_KEY` | JWT signing key | Use `secrets.token_urlsafe(32)` |
 | `ADMIN_USERNAME` | Admin login username | `admin` |
@@ -233,7 +233,7 @@ docker-compose logs -f scheduler
 docker inspect --format='{{.State.Health.Status}}' patient-safety-monitor
 
 # Manual health check
-curl http://localhost:8000/health
+curl http://localhost:7410/health
 ```
 
 ### Viewing Logs
