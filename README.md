@@ -54,7 +54,7 @@ docker-compose run --rm migrate
 ```
 
 4. **Access the admin dashboard:**
-Open http://localhost:8000 in your browser.
+Open http://localhost:7410 in your browser.
 
 ## Development
 
@@ -80,14 +80,14 @@ docker run -d \
   -e POSTGRES_USER=psm_user \
   -e POSTGRES_PASSWORD=psm_password \
   -e POSTGRES_DB=patient_safety_monitor \
-  -p 5432:5432 \
+  -p 7411:5432 \
   postgres:15-alpine
 ```
 
 4. **Configure environment:**
 ```bash
 cp .env.example .env
-# Edit .env with DATABASE_URL=postgresql://psm_user:psm_password@localhost:5432/patient_safety_monitor
+# Edit .env with DATABASE_URL=postgresql://psm_user:psm_password@localhost:7411/patient_safety_monitor
 ```
 
 5. **Run migrations:**
@@ -99,7 +99,7 @@ python -m scripts.seed_sources
 6. **Start the application:**
 ```bash
 # Start the web server
-uvicorn admin.main:app --reload --port 8000
+uvicorn admin.main:app --reload --port 7410
 
 # In another terminal, start the scheduler
 python -m scrapers.scheduler
@@ -149,7 +149,7 @@ Create a production `.env` file with the following variables:
 
 ```bash
 # Database
-DATABASE_URL=postgresql://user:password@host:5432/patient_safety_monitor
+DATABASE_URL=postgresql://user:password@host:7411/patient_safety_monitor
 
 # LLM API Keys
 ANTHROPIC_API_KEY=your_claude_api_key
@@ -217,7 +217,7 @@ docker-compose logs -f app
 docker-compose logs -f scheduler
 
 # Check health
-curl http://localhost:8000/health
+curl http://localhost:7410/health
 ```
 
 4. **Update deployment:**
@@ -456,7 +456,7 @@ The API supports two authentication methods:
 
 **Example Login:**
 ```bash
-curl -X POST http://localhost:8000/api/auth/login \
+curl -X POST http://localhost:7410/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"your_password"}'
 ```

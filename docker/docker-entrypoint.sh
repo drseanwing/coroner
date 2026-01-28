@@ -152,7 +152,7 @@ start_services() {
     case "$RUN_MODE" in
         "app")
             log_info "Starting web application only..."
-            exec uvicorn admin.main:app --host 0.0.0.0 --port 8000
+            exec uvicorn admin.main:app --host 0.0.0.0 --port 7410
             ;;
         "scheduler")
             log_info "Starting scheduler only..."

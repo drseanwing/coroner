@@ -15,7 +15,7 @@ services:
       target: production
     container_name: patient-safety-monitor
     ports:
-      - "${APP_PORT:-8000}:8000"
+      - "${APP_PORT:-7410}:7410"
     environment:
       # Database
       - DATABASE_URL=postgresql://psm_user:psm_password@db:5432/patient_safety_monitor
@@ -51,7 +51,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:7410/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -78,7 +78,7 @@ services:
       # - ./docker/postgresql.conf:/etc/postgresql/postgresql.conf:ro
     ports:
       # Expose only in development - remove or comment out in production
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT:-7411}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U psm_user -d patient_safety_monitor"]
       interval: 10s
@@ -106,7 +106,7 @@ services:
   #     - DATABASE_URL=postgresql://psm_user:psm_password@db:5432/patient_safety_monitor
   #     # ... other env vars
   #   ports:
-  #     - "8000:8000"
+  #     - "7410:7410"
   #   depends_on:
   #     - db
   #   networks:
