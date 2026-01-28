@@ -351,7 +351,7 @@ class Settings(BaseSettings):
             if len(v) < 59:
                 raise ValueError(
                     "Invalid bcrypt hash format. Generate with: "
-                    "python -c \"import bcrypt; print(bcrypt.hashpw(b'password', bcrypt.gensalt()).decode())\""
+                    "python scripts/hash_password.py yourpassword"
                 )
             return v
 

@@ -39,9 +39,18 @@ cp .env.example .env
 ### 2. Generate Password Hash
 
 ```bash
-# Generate a bcrypt hash for your admin password
-python -c "import bcrypt; print(bcrypt.hashpw(b'your-password-here', bcrypt.gensalt()).decode())"
+# Generate a bcrypt hash for your admin password (docker-compose compatible)
+python scripts/hash_password.py your-password-here
+
+# The output will have $$ escaping for docker-compose .env files
+# Example: $$2b$$12$$...
+
+# For raw bcrypt hash (non-docker usage), use --raw flag:
+python scripts/hash_password.py your-password-here --raw
 ```
+
+> **Note:** Docker Compose interprets `$` in `.env` files as variable references.
+> The `hash_password.py` script automatically escapes `$` as `$$` for compatibility.
 
 ### 3. Start Services
 
