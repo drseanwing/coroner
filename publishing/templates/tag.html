@@ -9,7 +9,7 @@
     <!-- Header -->
     <header class="mb-8">
         <nav class="text-sm text-gray-500 mb-4">
-            <a href="/" class="hover:text-blue-600">Home</a>
+            <a href="/" class="hover:text-redi-coral">Home</a>
             <span class="mx-2">/</span>
             <span>Tags</span>
             <span class="mx-2">/</span>
@@ -17,7 +17,7 @@
         </nav>
         
         <div class="flex items-center gap-4">
-            <span class="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium text-lg">
+            <span class="px-4 py-2 bg-redi-light-teal text-redi-navy rounded-lg font-medium text-lg">
                 {{ tag }}
             </span>
             <div class="text-gray-600">
@@ -43,7 +43,7 @@
                 </div>
                 
                 <h2 class="text-xl font-semibold text-gray-900 mb-2">
-                    <a href="/posts/{{ post.slug }}/" class="hover:text-blue-600 transition-colors">
+                    <a href="/posts/{{ post.slug }}/" class="hover:text-redi-coral transition-colors">
                         {{ post.title }}
                     </a>
                 </h2>
@@ -59,7 +59,7 @@
                     {% for t in post.tags %}
                     <a href="/tags/{{ t | lower | replace(' ', '-') }}/" 
                        class="px-2 py-1 text-xs rounded transition-colors
-                              {% if t == tag %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+                              {% if t == tag %}bg-redi-light-teal text-redi-navy{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
                         {{ t }}
                     </a>
                     {% endfor %}
@@ -80,7 +80,7 @@
     
     <!-- Back to all posts -->
     <nav class="mt-8 pt-8 border-t border-gray-200">
-        <a href="/posts/" class="text-blue-600 hover:text-blue-800 inline-flex items-center">
+        <a href="/posts/" class="text-redi-coral hover:text-redi-navy inline-flex items-center">
             <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>

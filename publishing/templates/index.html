@@ -1,29 +1,29 @@
 {% extends "base.html" %}
 
-{% block title %}{{ site.title }} - Healthcare Safety Learnings{% endblock %}
+{% block title %}{{ site.title }} - Resuscitation EDucation Initiative{% endblock %}
 {% block description %}{{ site.description }}{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<section class="bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+<section class="bg-gradient-to-br from-redi-navy to-redi-teal text-white">
     <div class="max-w-4xl mx-auto px-4 py-16">
         <h1 class="text-4xl md:text-5xl font-bold mb-4">
             Learning from Patient Safety Incidents
         </h1>
-        <p class="text-xl text-blue-100 mb-8 max-w-2xl">
+        <p class="text-xl text-redi-light-teal mb-8 max-w-2xl">
             Aggregating insights from coronial investigations and healthcare safety reviews 
             across the UK, Australia, and New Zealand to help prevent future patient harm.
         </p>
         <div class="flex flex-wrap gap-4">
             <a href="/posts/" 
-               class="inline-flex items-center px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors">
+               class="inline-flex items-center px-6 py-3 bg-white text-redi-navy font-semibold rounded-lg hover:bg-gray-50 transition-colors">
                 Browse All Posts
                 <svg class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
             </a>
             <a href="/about/" 
-               class="inline-flex items-center px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-colors">
+               class="inline-flex items-center px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-redi-navy transition-colors">
                 Learn More
             </a>
         </div>
@@ -35,19 +35,19 @@
     <div class="max-w-4xl mx-auto px-4 py-8">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-                <div class="text-3xl font-bold text-blue-600">{{ total_posts }}</div>
+                <div class="text-3xl font-bold text-redi-coral">{{ total_posts }}</div>
                 <div class="text-sm text-gray-600">Case Studies</div>
             </div>
             <div>
-                <div class="text-3xl font-bold text-blue-600">3</div>
+                <div class="text-3xl font-bold text-redi-coral">3</div>
                 <div class="text-sm text-gray-600">Countries</div>
             </div>
             <div>
-                <div class="text-3xl font-bold text-blue-600">6+</div>
+                <div class="text-3xl font-bold text-redi-coral">6+</div>
                 <div class="text-sm text-gray-600">Data Sources</div>
             </div>
             <div>
-                <div class="text-3xl font-bold text-blue-600">SEIPS</div>
+                <div class="text-3xl font-bold text-redi-coral">SEIPS</div>
                 <div class="text-sm text-gray-600">Framework</div>
             </div>
         </div>
@@ -58,7 +58,7 @@
 <section class="max-w-4xl mx-auto px-4 py-12">
     <div class="flex items-center justify-between mb-8">
         <h2 class="text-2xl font-bold text-gray-900">Recent Posts</h2>
-        <a href="/posts/" class="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center">
+        <a href="/posts/" class="text-redi-coral hover:text-redi-navy font-medium inline-flex items-center">
             View All
             <svg class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -82,7 +82,7 @@
                 </div>
                 
                 <h3 class="text-xl font-semibold text-gray-900 mb-2">
-                    <a href="/posts/{{ post.slug }}/" class="hover:text-blue-600 transition-colors">
+                    <a href="/posts/{{ post.slug }}/" class="hover:text-redi-coral transition-colors">
                         {{ post.title }}
                     </a>
                 </h3>
@@ -128,7 +128,7 @@
         
         <div class="grid md:grid-cols-3 gap-8">
             <div class="text-center">
-                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div class="w-12 h-12 bg-redi-light-teal text-redi-navy rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -141,7 +141,7 @@
             </div>
             
             <div class="text-center">
-                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div class="w-12 h-12 bg-redi-light-teal text-redi-navy rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
@@ -154,7 +154,7 @@
             </div>
             
             <div class="text-center">
-                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div class="w-12 h-12 bg-redi-light-teal text-redi-navy rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
@@ -171,13 +171,13 @@
 
 <!-- Subscribe CTA -->
 <section class="max-w-4xl mx-auto px-4 py-12">
-    <div class="bg-blue-600 rounded-lg p-8 text-center text-white">
+    <div class="bg-redi-navy rounded-lg p-8 text-center text-white">
         <h2 class="text-2xl font-bold mb-4">Stay Informed</h2>
-        <p class="text-blue-100 mb-6">
+        <p class="text-gray-300 mb-6">
             Subscribe to our RSS feed to receive updates when new case studies are published.
         </p>
         <a href="/feed.xml" 
-           class="inline-flex items-center px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors">
+           class="inline-flex items-center px-6 py-3 bg-white text-redi-navy font-semibold rounded-lg hover:bg-gray-50 transition-colors">
             <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/>
             </svg>

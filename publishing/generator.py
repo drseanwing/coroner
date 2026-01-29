@@ -1,5 +1,5 @@
 """
-Patient Safety Monitor - Static Blog Generator
+REdI Patient Safety Monitor - Static Blog Generator
 
 Generates static HTML files from published posts for deployment.
 
@@ -118,10 +118,10 @@ class BlogGenerator:
         
         # Site configuration
         self.site_config = {
-            "title": "Patient Safety Monitor",
-            "description": "Learnings from coronial investigations and patient safety incidents",
+            "title": "REdI Patient Safety Monitor",
+            "description": "Resuscitation EDucation Initiative — Learnings from coronial investigations and patient safety incidents",
             "base_url": self.settings.blog_base_url or "https://patientsafetymonitor.org",
-            "author": "Patient Safety Monitor",
+            "author": "REdI Patient Safety Monitor",
             "language": "en",
         }
     
@@ -621,22 +621,84 @@ class BlogGenerator:
     def _generate_css(self) -> str:
         """Generate main CSS file."""
         return """
-/* Patient Safety Monitor - Main Styles */
-/* Using Tailwind via CDN in templates, this provides overrides */
+/* REdI Patient Safety Monitor - Main Styles */
+/* REdI Brand: Resuscitation EDucation Initiative */
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Bebas+Neue&display=swap');
 
 :root {
-    --primary-color: #4f46e5;
-    --secondary-color: #6366f1;
-    --text-color: #1f2937;
-    --text-muted: #6b7280;
+    /* REdI Primary Colors */
+    --redi-coral: #E55B64;
+    --redi-navy: #1B3A5F;
+    --redi-teal: #2B9E9E;
+
+    /* REdI Secondary Colors */
+    --redi-light-teal: #8DD4D4;
+    --redi-lime: #B8CC26;
+    --redi-sky: #5DADE2;
+    --redi-yellow: #F4D03F;
+
+    /* Neutrals */
+    --redi-black: #000000;
+    --redi-dark-gray: #333333;
+    --redi-medium-gray: #666666;
+    --redi-light-gray: #F5F5F5;
+    --redi-white: #FFFFFF;
+
+    /* Semantic */
+    --redi-error: #DC3545;
+    --redi-warning: #FFC107;
+    --redi-success: #28A745;
+    --redi-info: #17A2B8;
+
+    /* Legacy aliases */
+    --primary-color: var(--redi-coral);
+    --secondary-color: var(--redi-navy);
+    --text-color: var(--redi-dark-gray);
+    --text-muted: var(--redi-medium-gray);
     --border-color: #e5e7eb;
-    --bg-light: #f9fafb;
+    --bg-light: var(--redi-light-gray);
+
+    /* Spacing Scale */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-full: 9999px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Montserrat', 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
     line-height: 1.6;
     color: var(--text-color);
+}
+
+/* Focus states for accessibility */
+:focus-visible {
+    outline: 3px solid var(--redi-teal);
+    outline-offset: 2px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 
 /* Article content styling */
@@ -645,15 +707,15 @@ body {
 }
 
 .prose h1, .prose h2, .prose h3, .prose h4 {
-    color: var(--text-color);
+    color: var(--redi-navy);
     font-weight: 700;
     margin-top: 1.5em;
     margin-bottom: 0.5em;
 }
 
-.prose h1 { font-size: 2em; }
-.prose h2 { font-size: 1.5em; }
-.prose h3 { font-size: 1.25em; }
+.prose h1 { font-size: 2.5rem; line-height: 1.2; }
+.prose h2 { font-size: 2rem; line-height: 1.25; font-weight: 600; }
+.prose h3 { font-size: 1.5rem; line-height: 1.3; font-weight: 600; }
 
 .prose p {
     margin-bottom: 1em;
@@ -669,17 +731,28 @@ body {
 }
 
 .prose blockquote {
-    border-left: 4px solid var(--primary-color);
+    border-left: 4px solid var(--redi-coral);
     padding-left: 1em;
     margin: 1em 0;
     color: var(--text-muted);
     font-style: italic;
 }
 
+.prose a {
+    color: var(--redi-coral);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: text-decoration-color 0.2s ease;
+}
+
+.prose a:hover {
+    text-decoration-color: var(--redi-coral);
+}
+
 /* Code highlighting */
 .highlight {
     background: var(--bg-light);
-    border-radius: 0.375rem;
+    border-radius: var(--radius-md);
     padding: 1em;
     overflow-x: auto;
     margin: 1em 0;
@@ -693,8 +766,8 @@ body {
 /* Key learnings box */
 .key-learnings {
     background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border-left: 4px solid #f59e0b;
-    border-radius: 0.5rem;
+    border-left: 4px solid var(--redi-yellow);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
     padding: 1.5rem;
     margin: 1.5rem 0;
 }
@@ -715,14 +788,65 @@ body {
 .human-factors-card {
     background: white;
     border: 1px solid var(--border-color);
-    border-radius: 0.5rem;
+    border-radius: var(--radius-md);
     padding: 1rem;
 }
 
 .human-factors-card h4 {
-    color: var(--primary-color);
+    color: var(--redi-navy);
     margin-top: 0;
     margin-bottom: 0.5rem;
+}
+
+/* REdI Button Styles */
+.btn-primary {
+    background-color: var(--redi-coral);
+    color: var(--redi-white);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.btn-primary:hover {
+    background-color: #D14A53;
+}
+
+.btn-secondary {
+    background-color: var(--redi-navy);
+    color: var(--redi-white);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.btn-secondary:hover {
+    background-color: #152e4c;
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: var(--redi-coral);
+    border: 2px solid var(--redi-coral);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.btn-outline:hover {
+    background-color: var(--redi-coral);
+    color: var(--redi-white);
 }
 
 /* Print styles */
@@ -730,11 +854,11 @@ body {
     .no-print {
         display: none !important;
     }
-    
+
     body {
         font-size: 12pt;
     }
-    
+
     .prose {
         max-width: none;
     }
@@ -744,7 +868,7 @@ body {
     def _generate_js(self) -> str:
         """Generate search JavaScript."""
         return """
-// Patient Safety Monitor - Client-side Search
+// REdI Patient Safety Monitor - Client-side Search
 // Minimal implementation for static site
 
 (function() {
@@ -831,7 +955,7 @@ def main() -> int:
     
     setup_logging()
     logger.info("=" * 60)
-    logger.info("Patient Safety Monitor - Static Site Generator")
+    logger.info("REdI Patient Safety Monitor - Static Site Generator")
     logger.info("=" * 60)
     
     if not init_database():

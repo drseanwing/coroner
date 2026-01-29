@@ -70,7 +70,7 @@
         <div class="flex flex-wrap gap-2">
             {% for tag in post.tags %}
             <a href="/tags/{{ tag | lower | replace(' ', '-') }}/" 
-               class="inline-block px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors">
+               class="inline-block px-3 py-1 text-sm bg-redi-light-teal text-redi-navy rounded-full hover:bg-[#7ac8c8] transition-colors">
                 {{ tag }}
             </a>
             {% endfor %}
@@ -109,7 +109,7 @@
     {% if analysis and analysis.human_factors %}
     <section class="bg-gray-50 rounded-lg p-6 mb-8">
         <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-            <svg class="h-6 w-6 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="h-6 w-6 mr-2 text-redi-coral" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
             </svg>
             Human Factors Analysis (SEIPS 2.0)
@@ -227,7 +227,7 @@
                     <a href="{{ finding.source_url }}" 
                        target="_blank" 
                        rel="noopener noreferrer"
-                       class="text-blue-600 hover:text-blue-800 inline-flex items-center">
+                       class="text-redi-coral hover:text-redi-navy inline-flex items-center">
                         View Original
                         <svg class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -253,7 +253,7 @@
     <!-- Navigation -->
     <nav class="mt-8 pt-8 border-t border-gray-200">
         <div class="flex justify-between">
-            <a href="/posts/" class="text-blue-600 hover:text-blue-800 inline-flex items-center">
+            <a href="/posts/" class="text-redi-coral hover:text-redi-navy inline-flex items-center">
                 <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>

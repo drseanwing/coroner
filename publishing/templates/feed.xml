@@ -10,7 +10,7 @@
         <language>{{ site.language }}</language>
         <lastBuildDate>{{ generated_at.strftime('%a, %d %b %Y %H:%M:%S +0000') }}</lastBuildDate>
         <atom:link href="{{ site.base_url }}/feed.xml" rel="self" type="application/rss+xml"/>
-        <generator>Patient Safety Monitor</generator>
+        <generator>REdI Patient Safety Monitor</generator>
         <copyright>Content derived from public coronial findings</copyright>
         
         {% for post in posts %}

@@ -3,30 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Patient Safety Monitor</title>
+    <title>Login - REdI Admin</title>
+
+    <!-- Google Fonts: Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'redi': {
+                        'coral': '#E55B64',
+                        'navy': '#1B3A5F',
+                        'teal': '#2B9E9E',
+                    }
+                },
+                fontFamily: {
+                    'sans': ['Montserrat', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'sans-serif'],
+                },
+            }
+        }
+    }
+    </script>
 
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1B3A5F 0%, #2B9E9E 100%);
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+<body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
     <div class="max-w-md w-full space-y-8">
         <!-- Logo and Header -->
         <div class="text-center">
             <div class="flex justify-center mb-4">
-                <div class="h-16 w-16 bg-white rounded-full flex items-center justify-center">
-                    <span class="text-3xl font-bold text-indigo-600">PSM</span>
+                <div class="h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-lg">
+                    <span class="text-2xl font-bold"><span class="text-redi-navy">R</span><span class="text-redi-coral">Ed</span><span class="text-redi-navy">I</span></span>
                 </div>
             </div>
             <h2 class="text-3xl font-extrabold text-white">
-                Patient Safety Monitor
+                REdI Patient Safety Monitor
             </h2>
-            <p class="mt-2 text-sm text-indigo-100">
+            <p class="mt-2 text-sm text-redi-light-teal" style="color: #8DD4D4;">
                 Admin Dashboard - Sign in to continue
             </p>
         </div>
@@ -60,7 +83,7 @@
                             type="text"
                             autocomplete="username"
                             required
-                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-redi-teal focus:border-redi-teal sm:text-sm"
                             placeholder="Enter your username"
                         >
                     </div>
@@ -78,7 +101,7 @@
                             type="password"
                             autocomplete="current-password"
                             required
-                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-redi-teal focus:border-redi-teal sm:text-sm"
                             placeholder="Enter your password"
                         >
                     </div>
@@ -89,7 +112,7 @@
                     <button
                         type="submit"
                         id="submitButton"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-redi-coral hover:bg-[#D14A53] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-redi-teal transition-colors duration-200"
                     >
                         <span id="buttonText">Sign in</span>
                         <svg id="loadingSpinner" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -103,7 +126,7 @@
 
         <!-- Additional Info -->
         <div class="text-center">
-            <p class="text-xs text-indigo-100">
+            <p class="text-xs" style="color: #8DD4D4;">
                 Protected by OAuth2 JWT authentication
             </p>
         </div>
