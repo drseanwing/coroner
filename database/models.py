@@ -310,7 +310,7 @@ class Finding(Base, TimestampMixin):
     
     # Status
     status: Mapped[FindingStatus] = mapped_column(
-        SQLEnum(FindingStatus, name="finding_status"),
+        SQLEnum(FindingStatus, name="finding_status", values_callable=lambda e: [x.value for x in e]),
         nullable=False,
         default=FindingStatus.NEW,
         index=True,
@@ -371,7 +371,7 @@ class Analysis(Base):
     
     # LLM metadata
     llm_provider: Mapped[LLMProvider] = mapped_column(
-        SQLEnum(LLMProvider, name="llm_provider"),
+        SQLEnum(LLMProvider, name="llm_provider", values_callable=lambda e: [x.value for x in e]),
         nullable=False,
     )
     llm_model: Mapped[str] = mapped_column(
@@ -535,7 +535,7 @@ class Post(Base, TimestampMixin):
     
     # Status
     status: Mapped[PostStatus] = mapped_column(
-        SQLEnum(PostStatus, name="post_status"),
+        SQLEnum(PostStatus, name="post_status", values_callable=lambda e: [x.value for x in e]),
         nullable=False,
         default=PostStatus.DRAFT,
         index=True,
