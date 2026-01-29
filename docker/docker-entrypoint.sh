@@ -98,7 +98,7 @@ run_migrations() {
 
     log_info "Running database migrations..."
 
-    if alembic upgrade head; then
+    if python -m alembic upgrade head; then
         log_success "Database migrations completed successfully"
     else
         log_error "Database migrations failed!"

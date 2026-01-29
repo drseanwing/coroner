@@ -55,8 +55,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Install Playwright browsers
-RUN playwright install chromium
+# Ensure all venv files are readable and executables are accessible by any user
+RUN chmod -R a+rX /opt/venv
+
+# Install Playwright browsers to a shared location accessible by non-root user
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/browsers
+RUN playwright install chromium \
+    && chmod -R a+rX /opt/browsers
 
 # Copy application code
 COPY . .
@@ -67,7 +72,7 @@ RUN useradd --create-home --shell /bin/bash appuser \
 
 # Create directories for logs and data
 RUN mkdir -p /app/logs /app/data \
-    && chown -R appuser:appuser /app/logs /app/data /opt/venv
+    && chown -R appuser:appuser /app/logs /app/data /opt/venv /opt/browsers
 
 # Switch to non-root user
 USER appuser
