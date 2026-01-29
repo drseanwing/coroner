@@ -34,23 +34,23 @@ def upgrade() -> None:
     finding_status = postgresql.ENUM(
         'new', 'classified', 'analysed', 'published', 'excluded',
         name='finding_status',
-        create_type=True,
+        create_type=False,
     )
     finding_status.create(op.get_bind(), checkfirst=True)
-    
+
     # PostStatus enum
     post_status = postgresql.ENUM(
         'draft', 'pending_review', 'approved', 'published', 'rejected',
         name='post_status',
-        create_type=True,
+        create_type=False,
     )
     post_status.create(op.get_bind(), checkfirst=True)
-    
+
     # LLMProvider enum
     llm_provider = postgresql.ENUM(
         'claude', 'openai',
         name='llm_provider',
-        create_type=True,
+        create_type=False,
     )
     llm_provider.create(op.get_bind(), checkfirst=True)
     
