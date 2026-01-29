@@ -51,7 +51,7 @@
                     <input type="text" 
                            id="post-title"
                            value="{{ post.title }}"
-                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-redi-teal focus:border-redi-teal sm:text-sm">
                 </div>
                 
                 <!-- Content -->
@@ -59,7 +59,7 @@
                     <label class="block text-sm font-medium text-gray-700">Content (Markdown)</label>
                     <textarea id="post-content"
                               rows="20"
-                              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm font-mono text-sm">{{ post.content_markdown }}</textarea>
+                              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-redi-teal focus:border-redi-teal sm:text-sm font-mono text-sm">{{ post.content_markdown }}</textarea>
                 </div>
                 
                 <!-- Tags -->
@@ -69,7 +69,7 @@
                            id="post-tags"
                            value="{{ post.tags|join(', ') if post.tags else '' }}"
                            placeholder="communication, hospital, medication"
-                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-redi-teal focus:border-redi-teal sm:text-sm">
                     <p class="mt-1 text-xs text-gray-500">Comma-separated list of tags</p>
                 </div>
                 
@@ -79,7 +79,7 @@
                             hx-post="/review/{{ post.id }}/edit"
                             hx-target="#action-status"
                             hx-include="#post-title, #post-content, #post-tags"
-                            class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-redi-teal">
                         <span class="htmx-indicator mr-2">
                             <svg class="animate-spin h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -130,7 +130,7 @@
                     <dt class="text-sm font-medium text-gray-500">Original Source</dt>
                     <dd class="mt-1">
                         <a href="{{ finding.source_url }}" target="_blank" 
-                           class="text-sm text-indigo-600 hover:text-indigo-500">
+                           class="text-sm text-redi-coral hover:text-redi-navy">
                             {{ finding.source_url|truncate(60) }}
                             <svg class="inline h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

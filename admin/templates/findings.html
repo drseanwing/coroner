@@ -14,7 +14,7 @@
             <select 
                 onchange="updateFilters()"
                 id="status-filter"
-                class="block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                class="block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-redi-teal focus:border-redi-teal sm:text-sm rounded-md">
                 <option value="">All Statuses</option>
                 <option value="new" {% if current_status == 'new' %}selected{% endif %}>New</option>
                 <option value="classified" {% if current_status == 'classified' %}selected{% endif %}>Classified</option>
@@ -26,7 +26,7 @@
             <select 
                 onchange="updateFilters()"
                 id="source-filter"
-                class="block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                class="block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-redi-teal focus:border-redi-teal sm:text-sm rounded-md">
                 <option value="">All Sources</option>
                 {% for source in sources %}
                 <option value="{{ source.code }}" {% if current_source == source.code %}selected{% endif %}>

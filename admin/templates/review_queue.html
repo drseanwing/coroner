@@ -13,7 +13,7 @@
         <div class="mt-4 sm:mt-0">
             <select 
                 onchange="window.location.href='/review?status=' + this.value"
-                class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-redi-teal focus:border-redi-teal sm:text-sm rounded-md">
                 <option value="pending_review" {% if current_status == 'pending_review' %}selected{% endif %}>
                     Pending Review
                 </option>
@@ -42,7 +42,7 @@
                     <div class="px-4 py-4 sm:px-6">
                         <div class="flex items-center justify-between">
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-indigo-600 truncate">
+                                <p class="text-sm font-medium text-redi-coral truncate">
                                     {{ post.title }}
                                 </p>
                                 <p class="mt-1 text-sm text-gray-500">

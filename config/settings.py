@@ -1,5 +1,5 @@
 """
-Patient Safety Monitor - Configuration Settings
+REdI Patient Safety Monitor - Configuration Settings
 
 Centralized configuration management using Pydantic Settings.
 Loads configuration from environment variables and .env files.
@@ -226,7 +226,7 @@ class Settings(BaseSettings):
         description="Maximum retries for failed web requests",
     )
     user_agent: str = Field(
-        default="PatientSafetyMonitor/1.0 (+https://github.com/patient-safety-monitor)",
+        default="REdIPatientSafetyMonitor/1.0 (+https://github.com/patient-safety-monitor)",
         description="User agent for web requests",
     )
     
