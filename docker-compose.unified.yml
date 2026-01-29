@@ -16,19 +16,32 @@ services:
     container_name: patient-safety-monitor
     ports:
       - "${APP_PORT:-7410}:7410"
-    env_file:
-      - path: .env
-        required: false
     environment:
-      # Docker-specific overrides (these take precedence over .env values)
-      # Note: Sensitive values like ADMIN_PASSWORD_HASH and SECRET_KEY are
-      # loaded from .env via env_file above, avoiding bcrypt hash $ interpolation issues.
+      # Database
       - DATABASE_URL=postgresql://psm_user:psm_password@db:5432/patient_safety_monitor
+      # LLM API Keys
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      # Admin Authentication
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      # IMPORTANT: Bcrypt hashes contain $ characters. In your .env file,
+      # escape every $ as $$ (e.g. $$2b$$12$$...). Use: python scripts/hash_password.py
+      - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH:-changeme}
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      # Application Settings
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DEBUG=${DEBUG:-false}
       # Runtime Configuration
       - RUN_MODE=all
       - WAIT_FOR_DB=true
       - RUN_MIGRATIONS=true
       - SEED_SOURCES=true
+      # FTP Deployment (Optional)
+      - FTP_HOST=${FTP_HOST:-}
+      - FTP_USERNAME=${FTP_USERNAME:-}
+      - FTP_PASSWORD=${FTP_PASSWORD:-}
+      - FTP_REMOTE_PATH=${FTP_REMOTE_PATH:-/public_html/}
     volumes:
       # Persistent logs
       - psm_logs:/app/logs

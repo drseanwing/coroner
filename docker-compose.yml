@@ -12,13 +12,15 @@ services:
     container_name: psm-app
     ports:
       - "7410:7410"
-    env_file:
-      - path: .env
-        required: false
     environment:
-      # Docker-specific overrides (these take precedence over .env values)
       - DATABASE_URL=postgresql://psm_user:psm_password@db:5432/patient_safety_monitor
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH:-changeme}
+      - SECRET_KEY=${SECRET_KEY:-development-secret-key-change-in-production}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - LOG_FILE=/app/logs/app.log
+      - ENVIRONMENT=${ENVIRONMENT:-development}
     volumes:
       - ./logs:/app/logs
       - ./config:/app/config:ro
@@ -73,9 +75,6 @@ services:
         python -m scripts.seed_sources &&
         echo 'Migration complete!'
       "
-    env_file:
-      - path: .env
-        required: false
     environment:
       - DATABASE_URL=postgresql://psm_user:psm_password@db:5432/patient_safety_monitor
     volumes:
@@ -94,12 +93,10 @@ services:
       dockerfile: Dockerfile
     container_name: psm-scheduler
     command: python -m scrapers.scheduler
-    env_file:
-      - path: .env
-        required: false
     environment:
-      # Docker-specific overrides (these take precedence over .env values)
       - DATABASE_URL=postgresql://psm_user:psm_password@db:5432/patient_safety_monitor
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - LOG_FILE=/app/logs/scheduler.log
     volumes:
       - ./logs:/app/logs
